@@ -1,0 +1,17 @@
+﻿@model Admin.ViewModels.Auth.LoginVm
+@{
+    Layout = null;
+}
+
+<form asp-action="Login" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <input asp-for="Email" />
+    <span asp-validation-for="Email"></span>
+
+    <input asp-for="Password" type="password" />
+    <span asp-validation-for="Password"></span>
+
+    <button type="submit">Đăng nhập</button>
+</form>

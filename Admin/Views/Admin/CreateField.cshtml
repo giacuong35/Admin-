@@ -1,0 +1,87 @@
+﻿@model Admin.ViewModels.Fields.CreateFieldVm
+@{
+    ViewData["Title"] = "Thêm sân mới";
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-2xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Thêm sân mới
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Tạo mới sân bóng trong hệ thống Sport Plus. Điền đầy đủ thông tin để sân có thể sẵn sàng vận hành.
+            </p>
+            <a asp-action="Fields" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all w-fit">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                <span>Quay lại danh sách sân</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-8">
+        <form asp-action="CreateField" method="post" enctype="multipart/form-data" class="space-y-8">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-4"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2 md:col-span-2">
+                    <label asp-for="Name" class="text-sm font-bold text-zinc-700">Tên sân</label>
+                    <input asp-for="Name" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm focus:border-primary focus:ring-primary" />
+                    <span asp-validation-for="Name" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                    <label asp-for="Description" class="text-sm font-bold text-zinc-700">Mô tả</label>
+                    <textarea asp-for="Description" rows="4" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm focus:border-primary focus:ring-primary"></textarea>
+                    <span asp-validation-for="Description" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="BasePrice" class="text-sm font-bold text-zinc-700">Giá cơ bản</label>
+                    <input asp-for="BasePrice" type="number" step="1000" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm focus:border-primary focus:ring-primary" />
+                    <span asp-validation-for="BasePrice" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="TypeId" class="text-sm font-bold text-zinc-700">Loại sân</label>
+                    <select asp-for="TypeId" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm focus:border-primary focus:ring-primary">
+                        <option value="1">Sân 5</option>
+                        <option value="2">Sân 7</option>
+                        <option value="3">Sân 11</option>
+                    </select>
+                    <span asp-validation-for="TypeId" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="StatusId" class="text-sm font-bold text-zinc-700">Trạng thái</label>
+                    <select asp-for="StatusId" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm focus:border-primary focus:ring-primary">
+                        <option value="1">Hoạt động</option>
+                        <option value="2">Tạm khóa</option>
+                    </select>
+                    <span asp-validation-for="StatusId" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                    <label asp-for="ImageFile" class="text-sm font-bold text-zinc-700">Ảnh sân</label>
+                    <input asp-for="ImageFile" type="file" accept="image/*" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:opacity-90" />
+                    <span asp-validation-for="ImageFile" class="text-xs text-red-600"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100">
+                <a asp-action="Fields" class="px-6 py-3 rounded-2xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all">
+                    Hủy
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg hover:shadow-xl active:scale-95 transition-all">
+                    Lưu sân mới
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

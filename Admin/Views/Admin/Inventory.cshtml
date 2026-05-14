@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Quản lý Kho";
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <!-- Tiêu đề & Hành động chính -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+            <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-2 block">VẬN HÀNH & HẬU CẦN</span>
+            <h2 class="text-5xl font-black font-manrope tracking-tighter text-on-surface">Quản lý Kho</h2>
+        </div>
+        <div class="flex gap-4">
+            <button class="px-8 py-4 bg-white border-2 border-primary text-primary font-bold rounded-full flex items-center gap-2 hover:bg-primary/5 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">input</span> Nhập kho
+            </button>
+            <button class="px-8 py-4 bg-primary text-white font-bold rounded-full flex items-center gap-2 shadow-lg hover:shadow-primary/20 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">output</span> Xuất kho
+            </button>
+        </div>
+    </div>
+
+    <!-- Chỉ số thống kê (Bento Grid) -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-primary border">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-primary p-2 bg-emerald-50 rounded-lg">inventory</span>
+                <span class="text-xs font-bold text-emerald-600">+12%</span>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-widest text-zinc-500">Tổng mặt hàng</p>
+            <p class="text-3xl font-black font-manrope mt-1">1,284</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-amber-500 border">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-amber-600 p-2 bg-amber-50 rounded-lg">warning</span>
+                <span class="text-xs font-bold text-red-500">Cần nhập</span>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-widest text-zinc-500">Sắp hết hàng</p>
+            <p class="text-3xl font-black font-manrope mt-1">18</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-slate-500 border">
+            <div class="flex justify-between items-start mb-4">
+                <span class="material-symbols-outlined text-slate-600 p-2 bg-slate-50 rounded-lg">payments</span>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-widest text-zinc-500">Giá trị tồn kho</p>
+            <p class="text-3xl font-black font-manrope mt-1">452M <span class="text-sm font-medium">VND</span></p>
+        </div>
+
+        <div class="relative overflow-hidden bg-primary p-6 rounded-xl shadow-lg group">
+            <div class="relative z-10 text-white">
+                <p class="text-xs font-bold uppercase tracking-widest opacity-80">Tỷ lệ luân chuyển</p>
+                <p class="text-3xl font-black font-manrope mt-1">84%</p>
+                <p class="text-[10px] mt-2 opacity-70">Cao hơn 5% so với tháng trước</p>
+            </div>
+            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-white opacity-10">trending_up</span>
+        </div>
+    </div>
+
+    <!-- Bảng danh mục thiết bị -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-zinc-200">
+        <div class="px-8 py-6 border-b border-zinc-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h3 class="text-xl font-black font-manrope tracking-tight">Danh mục Trang thiết bị</h3>
+            <div class="flex gap-2">
+                <select class="bg-zinc-100 border-none text-xs font-bold uppercase tracking-widest rounded-lg px-4 py-2">
+                    <option>Tất cả danh mục</option>
+                    <option>Dụng cụ tập luyện</option>
+                    <option>Y tế</option>
+                </select>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-zinc-50">
+                    <tr>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Mặt hàng</th>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Số lượng</th>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Trạng thái</th>
+                        <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-100">
+                    <tr class="hover:bg-zinc-50 transition-colors">
+                        <td class="px-8 py-5">
+                            <p class="font-bold text-zinc-900 leading-none">Bóng đá Nike Elite 2026</p>
+                            <p class="text-[10px] text-zinc-400 mt-1">SKU: SP-SOC-001</p>
+                        </td>
+                        <td class="px-8 py-5 text-sm font-bold">45 Quả</td>
+                        <td class="px-8 py-5">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">In Stock</span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <button class="text-zinc-400 hover:text-primary"><span class="material-symbols-outlined">edit</span></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Biến động kho & Gợi ý -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-2 bg-white p-8 rounded-xl shadow-sm border border-zinc-200">
+            <h4 class="text-lg font-black font-manrope tracking-tight mb-6">Biến động kho gần đây</h4>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold">Nhập 20 Quả bóng đá Nike Elite</p>
+                            <p class="text-[10px] text-zinc-400">10:45 AM • Nguyễn Văn A</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-emerald-900 text-white p-8 rounded-xl relative overflow-hidden flex flex-col justify-between shadow-lg">
+            <div>
+                <h4 class="text-xl font-black font-manrope tracking-tight mb-2">Tối ưu hóa kho</h4>
+                <p class="text-sm opacity-90">Hệ thống gợi ý nhập thêm <strong>Băng cá nhân</strong> dựa trên tần suất sử dụng.</p>
+            </div>
+            <button class="mt-8 bg-white text-emerald-900 px-6 py-3 rounded-full font-bold text-sm shadow-lg active:scale-95 transition-all w-fit">Tạo đơn nhập</button>
+            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl opacity-10">inventory_2</span>
+        </div>
+    </div>
+</div>

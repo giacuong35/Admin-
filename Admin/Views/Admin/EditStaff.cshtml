@@ -1,0 +1,92 @@
+﻿@model Admin.ViewModels.Users.UpdateUserVm
+@{
+    ViewData["Title"] = "Chỉnh sửa nhân viên";
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-2xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Chỉnh sửa nhân viên
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Cập nhật thông tin tài khoản nhân viên trong hệ thống Sport Plus.
+            </p>
+            <a asp-action="Staff" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                <span>Quay lại danh sách nhân viên</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-8">
+        <form asp-action="EditStaff" asp-route-id="@Context.Request.RouteValues["id"]" method="post" class="space-y-8">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-4"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2 md:col-span-2">
+                    <label asp-for="FullName" class="text-sm font-bold text-zinc-700">Họ tên</label>
+                    <input asp-for="FullName" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    <span asp-validation-for="FullName" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="Email" class="text-sm font-bold text-zinc-700">Email</label>
+                    <input asp-for="Email" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    <span asp-validation-for="Email" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="Phone" class="text-sm font-bold text-zinc-700">Số điện thoại</label>
+                    <input asp-for="Phone" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    <span asp-validation-for="Phone" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="StatusId" class="text-sm font-bold text-zinc-700">Trạng thái</label>
+                    <select asp-for="StatusId" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm">
+                        <option value="1">Hoạt động</option>
+                        <option value="2">Tạm khóa</option>
+                    </select>
+                    <span asp-validation-for="StatusId" class="text-xs text-red-600"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100">
+                <a asp-action="Staff" class="px-6 py-3 rounded-2xl border border-zinc-200 text-sm font-bold text-zinc-600">
+                    Hủy
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            var successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

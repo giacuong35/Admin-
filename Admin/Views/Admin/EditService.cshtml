@@ -1,0 +1,78 @@
+﻿@model Admin.ViewModels.Services.UpdateServiceVm
+
+@{
+    ViewData["Title"] = "Chỉnh sửa dịch vụ";
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-2xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Chỉnh sửa dịch vụ
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Cập nhật thông tin và trạng thái hoạt động của dịch vụ.
+            </p>
+            <a asp-action="Services" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                <span>Quay lại danh sách dịch vụ</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-8">
+        <form asp-action="EditService" asp-route-id="@Context.Request.RouteValues["id"]" method="post" class="space-y-8">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-4"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2 md:col-span-2">
+                    <label asp-for="Name" class="text-sm font-bold text-zinc-700">Tên dịch vụ</label>
+                    <input asp-for="Name" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    <span asp-validation-for="Name" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                    <label asp-for="Description" class="text-sm font-bold text-zinc-700">Mô tả</label>
+                    <textarea asp-for="Description" rows="4" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm resize-none"></textarea>
+                    <span asp-validation-for="Description" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="Price" class="text-sm font-bold text-zinc-700">Giá dịch vụ</label>
+                    <input asp-for="Price" type="number" step="1000" min="0" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    <span asp-validation-for="Price" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="ImageUrl" class="text-sm font-bold text-zinc-700">Ảnh dịch vụ (URL)</label>
+                    <input asp-for="ImageUrl" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    <span asp-validation-for="ImageUrl" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <label asp-for="IsAvailable" class="text-sm font-bold text-zinc-700">Trạng thái</label>
+                    <select asp-for="IsAvailable" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm">
+                        <option value="true">Đang bán</option>
+                        <option value="false">Ngừng bán</option>
+                    </select>
+                    <span asp-validation-for="IsAvailable" class="text-xs text-red-600"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100">
+                <a asp-action="Services" class="px-6 py-3 rounded-2xl border border-zinc-200 text-sm font-bold text-zinc-600">
+                    Hủy
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

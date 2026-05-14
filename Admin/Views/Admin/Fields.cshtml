@@ -1,0 +1,147 @@
+﻿@model IEnumerable<Admin.ViewModels.Fields.FieldListItemVm>
+@{
+    ViewData["Title"] = "Quản lý sân";
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-2xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Quản lý sân bóng
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Theo dõi danh sách sân, loại sân, mức giá, trạng thái hoạt động và chất lượng vận hành của hệ thống Sport Plus.
+            </p>
+            <a asp-action="CreateField" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all w-fit">
+                <span class="material-symbols-outlined text-[20px]">add_business</span>
+                <span>Thêm sân mới</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-zinc-200">
+        <div class="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-white">
+            <h3 class="font-manrope font-bold text-xl text-primary">Danh sách sân</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-zinc-50">
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Sân</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Loại sân</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Giá cơ bản</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Giá cao điểm</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Trạng thái</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 text-center">Đánh giá</th>
+                        <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-100">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var field in Model)
+                        {
+                            <tr class="hover:bg-zinc-50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 flex items-center justify-center">
+                                            @if (!string.IsNullOrWhiteSpace(field.ImageUrl))
+                                            {
+                                                <img src="@field.ImageUrl" alt="@field.Name" class="w-full h-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <span class="material-symbols-outlined text-zinc-400">stadium</span>
+                                            }
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-on-surface text-sm">@field.Name</p>
+                                            <p class="text-xs text-zinc-400">@field.Description</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 text-sm font-medium">
+                                    @field.FieldType
+                                </td>
+
+                                <td class="px-6 py-4 text-sm font-bold text-on-surface">
+                                    @field.BasePrice.ToString("N0") đ
+                                </td>
+
+                                <td class="px-6 py-4 text-sm font-bold text-orange-600">
+                                    @field.PeakPrice.ToString("N0") đ
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full @(field.StatusId == 1 ? "bg-primary animate-pulse" : "bg-error")"></span>
+                                        <span class="text-sm font-medium @(field.StatusId == 1 ? "text-primary" : "text-error")">
+                                            @(field.Status ?? (field.StatusId == 1 ? "Hoạt động" : "Tạm khóa"))
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 text-center">
+                                    <div class="text-sm font-bold text-on-surface">
+                                        @(field.AvgRating?.ToString("0.0") ?? "0.0")
+                                    </div>
+                                    <div class="text-xs text-zinc-400">
+                                        @field.TotalReviews đánh giá
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a asp-action="EditField" asp-route-id="@field.FieldId" class="p-2 text-primary hover:bg-emerald-50 rounded-lg" title="Chỉnh sửa">
+                                            <span class="material-symbols-outlined">edit</span>
+                                        </a>
+
+                                        <form asp-action="DeleteField" asp-route-id="@field.FieldId" method="post" class="inline"
+                                              onsubmit="return confirm('Bạn chắc chắn muốn xóa sân này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="p-2 text-error hover:bg-red-50 rounded-lg" title="Xóa sân">
+                                                <span class="material-symbols-outlined">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-zinc-400">
+                                <div class="flex flex-col items-center gap-2 opacity-30">
+                                    <span class="material-symbols-outlined text-5xl">stadium</span>
+                                    <p class="font-bold uppercase tracking-widest text-xs">Chưa có dữ liệu sân nào</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
+
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

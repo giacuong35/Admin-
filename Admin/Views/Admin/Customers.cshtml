@@ -1,0 +1,205 @@
+﻿@model IEnumerable<Admin.ViewModels.Users.UserListItemVm>
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+
+@{
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+    int? selectedStatus = ViewBag.StatusId as int?;
+    string fromDate = ViewBag.FromDate as string ?? "";
+    string toDate = ViewBag.ToDate as string ?? "";
+}
+
+<div class="p-8 space-y-6 flex-1">
+    <div class="flex justify-between items-end">
+        <div>
+            <h2 class="text-4xl font-manrope font-black tracking-tight text-on-surface mb-1">Quản lý Khách hàng</h2>
+            <p class="text-zinc-500 text-sm font-medium">Quản lý danh sách, trạng thái của khách hàng.</p>
+        </div>
+        <div class="flex gap-3">
+            <button type="button" class="flex items-center gap-2 px-6 py-3 bg-white border border-zinc-200 rounded-2xl text-sm font-bold text-zinc-600 hover:bg-zinc-50 transition-all shadow-sm">
+                <span class="material-symbols-outlined text-[20px]">download</span>
+                Xuất báo cáo
+            </button>
+            <a asp-action="CreateCustomer" class="flex items-center gap-2 px-6 py-3 hero-gradient text-white rounded-2xl text-sm font-bold shadow-lg hover:shadow-xl active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-[20px]">person_add</span>
+                Thêm khách hàng
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="flex items-center gap-4">
+            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Trạng thái</span>
+            <div class="flex bg-zinc-100 p-1 rounded-xl">
+                <a asp-action="Customers"
+                   asp-route-fromDate="@fromDate"
+                   asp-route-toDate="@toDate"
+                   class="px-4 py-1.5 text-xs font-bold rounded-lg @(selectedStatus == null ? "bg-white shadow-sm text-primary" : "text-zinc-500 hover:text-zinc-700")">
+                    Tất cả
+                </a>
+
+                <a asp-action="Customers"
+                   asp-route-statusId="1"
+                   asp-route-fromDate="@fromDate"
+                   asp-route-toDate="@toDate"
+                   class="px-4 py-1.5 text-xs font-bold rounded-lg @(selectedStatus == 1 ? "bg-white shadow-sm text-primary" : "text-zinc-500 hover:text-zinc-700")">
+                    Active
+                </a>
+
+                <a asp-action="Customers"
+                   asp-route-statusId="2"
+                   asp-route-fromDate="@fromDate"
+                   asp-route-toDate="@toDate"
+                   class="px-4 py-1.5 text-xs font-bold rounded-lg @(selectedStatus == 2 ? "bg-white shadow-sm text-primary" : "text-zinc-500 hover:text-zinc-700")">
+                    Locked
+                </a>
+            </div>
+        </div>
+
+        <form asp-action="Customers" method="get" class="flex items-center gap-4 flex-wrap">
+            @if (selectedStatus.HasValue)
+            {
+                <input type="hidden" name="statusId" value="@selectedStatus" />
+            }
+
+            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Thời gian đăng ký</span>
+
+            <div class="flex items-center gap-2 bg-zinc-100 px-4 py-2 rounded-xl">
+                <input type="date" name="fromDate" value="@fromDate" class="bg-transparent border-none p-0 text-xs font-bold text-zinc-600 focus:ring-0" />
+                <span class="text-zinc-400 text-xs">to</span>
+                <input type="date" name="toDate" value="@toDate" class="bg-transparent border-none p-0 text-xs font-bold text-zinc-600 focus:ring-0" />
+            </div>
+
+            <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold">
+                Lọc
+            </button>
+
+            <a asp-action="Customers" class="px-4 py-2 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-600">
+                Xóa lọc
+            </a>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-50">
+                    <th class="px-8 py-5">Khách hàng</th>
+                    <th class="px-6 py-5">Thông tin liên hệ</th>
+                    <th class="px-6 py-5 text-center">Số lần đặt</th>
+                    <th class="px-6 py-5">Trạng thái</th>
+                    <th class="px-8 py-5 text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-50">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        var avatarLetter = string.IsNullOrWhiteSpace(item.FullName) ? "?" : item.FullName.Substring(0, 1).ToUpper();
+
+                        <tr class="hover:bg-zinc-50/50 transition-colors group">
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-primary font-black text-xs">
+                                        @avatarLetter
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-on-surface">@item.FullName</p>
+                                        <p class="text-[10px] text-zinc-400 font-medium">ID: #SP@(item.UserId.ToString("D5"))</p>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-5">
+                                <p class="text-sm font-medium text-zinc-600">@item.Email</p>
+                                <p class="text-xs text-zinc-400">@item.Phone</p>
+                            </td>
+
+                            <td class="px-6 py-5 text-center">
+                                <span class="text-sm font-black text-on-surface">0</span>
+                            </td>
+
+                            <td class="px-6 py-5">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full @(item.StatusId == 1 ? "bg-primary animate-pulse" : "bg-error")"></span>
+                                    <span class="text-[10px] font-black uppercase tracking-tighter @(item.StatusId == 1 ? "text-primary" : "text-error")">
+                                        @(item.Status ?? (item.StatusId == 1 ? "Hoạt động" : "Tạm khóa"))
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="px-8 py-5 text-right">
+                                <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <a asp-action="EditCustomer" asp-route-id="@item.UserId" class="p-2 text-primary hover:text-primary hover:bg-emerald-50 rounded-lg transition-all" title="Chỉnh sửa">
+                                        <span class="material-symbols-outlined text-[20px]">edit</span>
+                                    </a>
+
+                                    @if (item.StatusId == 1)
+                                    {
+                                        <form asp-action="LockCustomer" asp-route-id="@item.UserId" method="post" class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="p-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-all" title="Khóa tài khoản">
+                                                <span class="material-symbols-outlined text-[20px]">lock</span>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="UnlockCustomer" asp-route-id="@item.UserId" method="post" class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all" title="Mở khóa tài khoản">
+                                                <span class="material-symbols-outlined text-[20px]">lock_open</span>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <form asp-action="DeleteCustomer" asp-route-id="@item.UserId" method="post" class="inline"
+                                          onsubmit="return confirm('Bạn chắc chắn muốn xóa khách hàng này?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all" title="Xóa khách hàng">
+                                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="px-8 py-12 text-center text-zinc-400">
+                            <div class="flex flex-col items-center gap-2 opacity-30">
+                                <span class="material-symbols-outlined text-5xl">group_off</span>
+                                <p class="font-bold uppercase tracking-widest text-xs">Chưa có dữ liệu khách hàng nào</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            var successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Báo cáo & Phân tích";
+}
+
+@* Phần Reports Canvas lấy từ code.html *@
+<section class="p-8 space-y-8 max-w-7xl mx-auto w-full">
+    <!-- Hero Header & Filters -->
+    <div class="flex flex-col md:flex-row justify-between items-end gap-6">
+        <div>
+            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2 block">Insights & Data</span>
+            <h1 class="text-5xl font-extrabold tracking-tight text-on-surface leading-none">Báo Cáo Tổng Quan</h1>
+            <p class="text-secondary mt-4 max-w-md">Phân tích hiệu suất vận hành và doanh thu thực tế.</p>
+        </div>
+        <div class="flex flex-wrap gap-3 glass-panel p-4 rounded-2xl shadow-lg">
+            <select class="bg-surface-container border-0 rounded-lg text-sm font-semibold px-4 py-2">
+                <option>Tháng này (Tháng 5, 2026)</option>
+            </select>
+            <button class="bg-primary text-white flex items-center gap-2 px-6 py-2 rounded-full font-bold text-sm hover:opacity-90 transition-all">
+                <span class="material-symbols-outlined text-sm">download</span> Xuất báo cáo
+            </button>
+        </div>
+    </div>
+
+    <!-- Bento Grid Metrics: Biểu đồ doanh thu và công suất -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        @* Biểu đồ doanh thu chi tiết *@
+        <div class="md:col-span-3 bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-6 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-lg font-extrabold font-headline">Doanh Thu Thực Tế</h3>
+                    <p class="text-sm text-secondary">Dòng tiền hàng ngày trong tháng 5</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-black text-primary leading-none">842.000.000đ</div>
+                </div>
+            </div>
+            @* Placeholder thanh biểu đồ *@
+            <div class="h-64 w-full flex items-end gap-2 px-2">
+                <div class="flex-1 bg-surface-container rounded-t-lg h-[40%]"></div>
+                <div class="flex-1 bg-surface-container rounded-t-lg h-[70%]"></div>
+                <div class="flex-1 bg-primary rounded-t-lg h-[95%]"></div>
+                <div class="flex-1 bg-surface-container rounded-t-lg h-[60%]"></div>
+            </div>
+        </div>
+
+        @* Tỉ lệ lấp đầy sân (Pie chart giả lập) *@
+        <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-6">
+            <h3 class="text-lg font-extrabold font-headline leading-tight">Tỉ Lệ Lấp Đầy Sân</h3>
+            <div class="relative flex-1 flex items-center justify-center">
+                <div class="w-40 h-40 rounded-full border-[16px] border-surface-container flex items-center justify-center relative">
+                    <div class="absolute inset-0 rounded-full border-[16px] border-primary border-t-transparent border-r-transparent rotate-[30deg]"></div>
+                    <div class="text-center"><div class="text-2xl font-black">78%</div><div class="text-[10px] uppercase font-bold text-secondary">Công suất</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Data Table: Bảng doanh thu chi tiết -->
+    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-surface-container">
+            <h3 class="text-lg font-extrabold font-headline">Chi Tiết Doanh Thu Theo Ngày</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-surface-container-low">
+                    <tr>
+                        <th class="px-6 py-4 text-[10px] uppercase font-bold tracking-widest text-secondary">Ngày</th>
+                        <th class="px-6 py-4 text-[10px] uppercase font-bold tracking-widest text-secondary">Số đơn</th>
+                        <th class="px-6 py-4 text-[10px] uppercase font-bold tracking-widest text-secondary">Tiền sân</th>
+                        <th class="px-6 py-4 text-[10px] uppercase font-bold tracking-widest text-secondary text-right">Thực thu</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-container">
+                    <tr class="hover:bg-surface-container-low transition-colors">
+                        <td class="px-6 py-4 text-sm font-semibold">15/05/2026</td>
+                        <td class="px-6 py-4 text-sm">48 đơn</td>
+                        <td class="px-6 py-4 text-sm">32.400.000đ</td>
+                        <td class="px-6 py-4 text-sm font-black text-right">35.100.000đ</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

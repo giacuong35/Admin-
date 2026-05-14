@@ -1,0 +1,183 @@
+﻿@model List<Admin.ViewModels.Services.ServiceListItemVm>
+
+@{
+    ViewData["Title"] = "Quản lý dịch vụ";
+    bool? selectedAvailability = ViewBag.IsAvailable as bool?;
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Quản lý dịch vụ
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Quản lý danh sách dịch vụ bổ sung, trạng thái hoạt động và thông tin giá dịch vụ.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="flex items-center gap-4">
+            <span class="text-[10px] font-black uppercase tracking-widest text-zinc-400">Trạng thái</span>
+            <div class="flex bg-zinc-100 p-1 rounded-xl">
+                <a asp-action="Services"
+                   class="px-4 py-1.5 text-xs font-bold rounded-lg @(selectedAvailability == null ? "bg-white shadow-sm text-primary" : "text-zinc-500 hover:text-zinc-700")">
+                    Tất cả
+                </a>
+
+                <a asp-action="Services"
+                   asp-route-isAvailable="true"
+                   class="px-4 py-1.5 text-xs font-bold rounded-lg @(selectedAvailability == true ? "bg-white shadow-sm text-primary" : "text-zinc-500 hover:text-zinc-700")">
+                    Đang bán
+                </a>
+
+                <a asp-action="Services"
+                   asp-route-isAvailable="false"
+                   class="px-4 py-1.5 text-xs font-bold rounded-lg @(selectedAvailability == false ? "bg-white shadow-sm text-primary" : "text-zinc-500 hover:text-zinc-700")">
+                    Ngừng bán
+                </a>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a asp-action="Services"
+               class="px-4 py-2 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:bg-zinc-50">
+                Xóa lọc
+            </a>
+
+            <a asp-action="CreateService"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                <span>Thêm dịch vụ</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-100 bg-white">
+            <h3 class="font-manrope font-bold text-xl text-primary">Danh sách dịch vụ</h3>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1000px]">
+                    <thead class="bg-zinc-50 border-b border-zinc-100">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Dịch vụ</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Mô tả</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Giá</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Trạng thái</th>
+                            <th class="px-6 py-4 text-right text-[11px] font-black uppercase tracking-widest text-zinc-400">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-100">
+                        @foreach (var item in Model)
+                        {
+                            <tr class="group hover:bg-zinc-50/60 transition-all">
+                                <td class="px-6 py-5">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                                            @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                            {
+                                                <img src="@item.ImageUrl" alt="@item.Name" class="w-full h-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <span class="material-symbols-outlined text-zinc-400 text-[28px]">inventory_2</span>
+                                            }
+                                        </div>
+
+                                        <div>
+                                            <h4 class="font-manrope font-bold text-base text-on-surface">@item.Name</h4>
+                                            <p class="text-xs text-zinc-400 font-semibold mt-1">ID: SV-@item.ServiceId.ToString("D4")</p>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <p class="text-sm text-zinc-600 max-w-md line-clamp-2">
+                                        @(string.IsNullOrWhiteSpace(item.Description) ? "Không có mô tả" : item.Description)
+                                    </p>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    <span class="font-bold text-primary text-sm">@item.Price.ToString("N0") VNĐ</span>
+                                </td>
+
+                                <td class="px-6 py-5">
+                                    @if (item.IsAvailable)
+                                    {
+                                        <span class="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            Đang bán
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-2 text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full">
+                                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                            Ngừng bán
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="px-6 py-5 text-right">
+                                    <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a asp-action="EditService" asp-route-id="@item.ServiceId"
+                                           class="p-2 text-primary hover:bg-emerald-50 rounded-lg transition-all"
+                                           title="Chỉnh sửa">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+
+                                        <form asp-action="DeleteService" asp-route-id="@item.ServiceId" method="post" class="inline"
+                                              onsubmit="return confirm('Bạn chắc chắn muốn xóa dịch vụ này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    title="Xóa dịch vụ">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="px-6 py-16 text-center">
+                <div class="w-20 h-20 mx-auto rounded-full bg-zinc-100 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-zinc-400 text-[36px]">inventory_2</span>
+                </div>
+                <h4 class="font-manrope font-bold text-lg text-zinc-700">Chưa có dịch vụ nào</h4>
+                <p class="text-sm text-zinc-500 mt-2">Hãy thêm dịch vụ đầu tiên cho hệ thống của bạn.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            var successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}
