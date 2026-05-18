@@ -1,121 +1,131 @@
-﻿@{
-    ViewData["Title"] = "Nhà Cung Cấp";
+﻿@model Admin.ViewModels.Common.PagedResult<Admin.ViewModels.Suppliers.SupplierListItemVm>
+
+@{
+    ViewData["Title"] = "Nhà cung cấp";
+    var search = ViewBag.Search as string ?? "";
+    var successMessage = TempData["SuccessMessage"]?.ToString();
 }
 
 <div class="p-8 space-y-8 flex-1">
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Quản lý nhà cung cấp
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Quản lý danh sách nhà cung cấp, thông tin liên hệ và địa chỉ làm việc.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex flex-col md:flex-row gap-4 md:items-end md:justify-between">
+        <form asp-action="Suppliers" method="get" class="flex-1">
+            <label class="block text-xs font-bold text-zinc-500 mb-2">Tìm kiếm</label>
+            <div class="flex gap-3">
+                <input type="text" name="search" value="@search" placeholder="Tên NCC, người liên hệ, SĐT, email..."
+                       class="flex-1 rounded-xl border border-zinc-200 px-4 py-3 text-sm" />
+                <button type="submit" class="px-5 py-3 rounded-xl hero-gradient text-white text-sm font-bold">
+                    Tìm
+                </button>
+                <a asp-action="Suppliers" class="px-5 py-3 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600">
+                    Xóa lọc
+                </a>
+            </div>
+        </form>
+
         <div>
-            <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-2 block">Quản lý Kho vận</span>
-            <h2 class="text-5xl font-black font-manrope tracking-tighter text-on-surface leading-none">Nhà Cung Cấp</h2>
-        </div>
-        <button class="hero-gradient text-white px-8 py-4 rounded-full font-bold shadow-2xl hover:shadow-primary/20 active:scale-95 transition-all flex items-center gap-2">
-            <span class="material-symbols-outlined">add</span>
-            Thêm nhà cung cấp
-        </button>
-    </div>
-
-    <!-- Summary Bento Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-primary border relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Tổng đối tác</p>
-                <p class="text-4xl font-black font-manrope">42</p>
-                <p class="text-xs text-primary mt-2 flex items-center font-medium">
-                    <span class="material-symbols-outlined text-sm mr-1">trending_up</span> +3 tháng này
-                </p>
-            </div>
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-zinc-100 opacity-20 rotate-12">handshake</span>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-amber-500 border relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Thiết bị & Dụng cụ</p>
-                <p class="text-4xl font-black font-manrope">18</p>
-                <p class="text-xs text-zinc-500 mt-2 font-medium">Nike, Adidas, Molten...</p>
-            </div>
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-zinc-100 opacity-20 rotate-12">sports_soccer</span>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-slate-500 border relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Đồ uống & Dinh dưỡng</p>
-                <p class="text-4xl font-black font-manrope">15</p>
-                <p class="text-xs text-zinc-500 mt-2 font-medium">Revive, Pocari, Nestlé...</p>
-            </div>
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-zinc-100 opacity-20 rotate-12">local_drink</span>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-zinc-400 border relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">Dịch vụ bảo trì</p>
-                <p class="text-4xl font-black font-manrope">09</p>
-                <p class="text-xs text-zinc-500 mt-2 font-medium">Vệ sinh, Sửa chữa sân...</p>
-            </div>
-            <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl text-zinc-100 opacity-20 rotate-12">build</span>
+            <a asp-action="CreateSupplier"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">add_business</span>
+                <span>Thêm nhà cung cấp</span>
+            </a>
         </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-zinc-200">
-        <div class="p-6 flex justify-between items-center bg-zinc-50/50">
-            <h3 class="font-bold text-lg">Danh sách nhà cung cấp</h3>
-            <div class="flex gap-2">
-                <button class="px-4 py-2 bg-white rounded-lg text-sm font-bold border border-zinc-200 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">filter_list</span> Lọc
-                </button>
-                <button class="px-4 py-2 bg-white rounded-lg text-sm font-bold border border-zinc-200 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">download</span> Xuất CSV
-                </button>
-            </div>
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-100">
+            <h3 class="font-manrope font-bold text-xl text-primary">Danh sách nhà cung cấp</h3>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-zinc-50">
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">Tên nhà cung cấp</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">Số điện thoại</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">Email</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Trạng thái</th>
-                        <th class="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-zinc-100">
-                    <tr class="hover:bg-zinc-50 transition-colors group">
-                        <td class="px-6 py-5">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center text-primary font-black">NK</div>
-                                <span class="font-bold text-on-surface">Nike Vietnam Co.</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-5 text-sm text-zinc-500">028 3930 1234</td>
-                        <td class="px-6 py-5 text-sm text-zinc-500">contact@nike.com.vn</td>
-                        <td class="px-6 py-5 text-center">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 uppercase tracking-wider">
-                                <span class="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse"></span>
-                                Partnering
-                            </span>
-                        </td>
-                        <td class="px-6 py-5 text-right">
-                            <button class="text-zinc-400 hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined">more_vert</span>
-                            </button>
-                        </td>
-                    </tr>
-                    @* Thêm các dòng khác tương tự từ file code *@
-                </tbody>
-            </table>
-        </div>
-    </div>
 
-    <!-- Visual Decorative Element -->
-    <div class="relative h-64 w-full rounded-2xl overflow-hidden group shadow-md border border-zinc-200">
-        <img class="absolute inset-0 w-full h-full object-cover grayscale brightness-50 group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvH-MbonV6ZVTYxYZxXGQJ5SC5ycJRYwDJXbTIw3GQ3Amoe0HXB_icr2a9XWP61cJn_puLe8e0mTPPGjctMYK5xe-q-jb9RgEVDcjZr_ZNZ8WTaimOWdfyYlazQra4KoT3R-n1AlEton0cMUEYZRPHbULW_nPPF9nrCLROVV_1KgZMTApN_exCHJb3jeIQLPzdyfXYhowrfamXLXDUP68ezkBjqq9R1paN9hgQfUhX0y91UiKfCn95aAiyyTnR5STaJEBoCioZ1jU" />
-        <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent flex items-center px-12">
-            <div class="max-w-lg">
-                <h4 class="text-white text-4xl font-black font-manrope tracking-tighter leading-tight mb-4">Chuỗi Cung Ứng Sport Plus</h4>
-                <p class="text-white/80 text-sm font-medium leading-relaxed">Kết nối với các thương hiệu thể thao hàng đầu để mang lại trải nghiệm chuyên nghiệp nhất cho vận động viên.</p>
+        @if (Model != null && Model.Items.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1100px]">
+                    <thead class="bg-zinc-50 border-b border-zinc-100">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Mã NCC</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Tên nhà cung cấp</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Người liên hệ</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Điện thoại</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Email</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Địa chỉ</th>
+                            <th class="px-6 py-4 text-right text-[11px] font-black uppercase tracking-widest text-zinc-400">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-100">
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr class="hover:bg-zinc-50/60 transition-all">
+                                <td class="px-6 py-5 font-bold text-zinc-700">SUP-@item.SupplierId.ToString("D4")</td>
+                                <td class="px-6 py-5 font-bold text-on-surface">@item.Name</td>
+                                <td class="px-6 py-5 text-zinc-600">@item.ContactName</td>
+                                <td class="px-6 py-5 text-zinc-600">@item.Phone</td>
+                                <td class="px-6 py-5 text-zinc-600">@item.Email</td>
+                                <td class="px-6 py-5 text-zinc-600 max-w-xs">@item.Address</td>
+                                <td class="px-6 py-5 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <a asp-action="EditSupplier" asp-route-id="@item.SupplierId"
+                                           class="p-2 text-primary hover:bg-emerald-50 rounded-lg transition-all"
+                                           title="Chỉnh sửa">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+
+                                        <form asp-action="DeleteSupplier" asp-route-id="@item.SupplierId" method="post" class="inline"
+                                              onsubmit="return confirm('Bạn chắc chắn muốn xóa nhà cung cấp này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    title="Xóa">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        </div>
+
+            <div class="px-6 py-4 border-t border-zinc-100 flex items-center justify-between text-sm text-zinc-500">
+                <div>Tổng: <span class="font-bold text-zinc-700">@Model.TotalCount</span> nhà cung cấp</div>
+                <div>Trang <span class="font-bold text-zinc-700">@Model.Page</span> / @Model.TotalPages</div>
+            </div>
+        }
+        else
+        {
+            <div class="px-6 py-16 text-center text-zinc-500">
+                Không có nhà cung cấp nào.
+            </div>
+        }
     </div>
 </div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            const successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+            if (typeof Swal !== "undefined" && successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

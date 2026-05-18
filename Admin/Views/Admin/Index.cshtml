@@ -1,118 +1,138 @@
-﻿@{
-    ViewData["Title"] = "Tổng quan Dashboard";
+﻿@model Admin.ViewModels.Dashboard.DashboardPageVm
+
+@{
+    ViewData["Title"] = "Tổng quan";
+    var summary = Model.Summary ?? new Admin.ViewModels.Dashboard.DashboardSummaryVm();
+    var topServices = Model.RevenueByService?.Take(5).ToList() ?? new();
 }
 
-@* Phần Content Canvas lấy từ code_2.html *@
 <div class="p-8 space-y-8 flex-1">
-    <!-- Hero Stats Grid: Hiển thị các chỉ số quan trọng -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        @* Doanh thu hôm nay *@
-        <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary group hover:bg-primary transition-all duration-300">
-            <div class="flex justify-between items-start mb-4">
-                <span class="material-symbols-outlined text-primary group-hover:text-white">payments</span>
-                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+12%</span>
-            </div>
-            <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest group-hover:text-emerald-100">Doanh thu hôm nay</p>
-            <h3 class="text-2xl font-black font-manrope mt-1 group-hover:text-white">12.450k VND</h3>
-        </div>
-
-        @* Số lượng đặt sân *@
-        <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-tertiary group hover:bg-tertiary transition-all duration-300">
-            <div class="flex justify-between items-start mb-4">
-                <span class="material-symbols-outlined text-tertiary group-hover:text-white">calendar_today</span>
-                <span class="text-[10px] font-bold text-tertiary bg-tertiary-fixed px-2 py-1 rounded-full">+5</span>
-            </div>
-            <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest group-hover:text-tertiary-fixed">Số lượng đặt sân</p>
-            <h3 class="text-2xl font-black font-manrope mt-1 group-hover:text-white">48</h3>
-        </div>
-
-        @* Sân đang hoạt động (Live) *@
-        <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-secondary group hover:bg-secondary transition-all duration-300">
-            <div class="flex justify-between items-start mb-4">
-                <span class="material-symbols-outlined text-secondary group-hover:text-white">stadium</span>
-                <div class="flex items-center gap-1 group-hover:text-white">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[10px] font-bold">Live</span>
-                </div>
-            </div>
-            <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest group-hover:text-secondary-fixed">Sân đang hoạt động</p>
-            <h3 class="text-2xl font-black font-manrope mt-1 group-hover:text-white">12/15</h3>
-        </div>
-
-        @* Khách hàng mới *@
-        <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border-l-4 border-primary-container group hover:bg-primary-container transition-all duration-300">
-            <div class="flex justify-between items-start mb-4">
-                <span class="material-symbols-outlined text-primary-container group-hover:text-white">person_add</span>
-                <span class="text-[10px] font-bold text-primary-container bg-primary-fixed px-2 py-1 rounded-full">+8%</span>
-            </div>
-            <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest group-hover:text-on-primary-container">Khách hàng mới</p>
-            <h3 class="text-2xl font-black font-manrope mt-1 group-hover:text-white">24</h3>
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Tổng quan hệ thống
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Theo dõi booking, doanh thu, sân hoạt động và các chỉ số quan trọng theo dữ liệu thực tế từ hệ thống.
+            </p>
+            <a asp-action="Reports"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">bar_chart</span>
+                <span>Xem báo cáo chi tiết</span>
+            </a>
         </div>
     </div>
 
-    <!-- Bento Charts Section: Biểu đồ xu hướng và phân bổ -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        @* Biểu đồ doanh thu (SVG/CSS) *@
-        <div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-xl shadow-sm relative overflow-hidden">
-            <div class="flex justify-between items-end mb-8">
-                <div>
-                    <h2 class="text-2xl font-black font-manrope tracking-tight uppercase">Xu hướng doanh thu</h2>
-                    <p class="text-sm text-zinc-500 font-medium">Phân tích dòng tiền hàng tháng</p>
-                </div>
-                <div class="flex gap-2">
-                    <button class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest border border-zinc-200 rounded-lg">Tuần</button>
-                    <button class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-primary text-white rounded-lg">Tháng</button>
-                </div>
-            </div>
-            <div class="h-64 w-full flex items-end gap-1">
-                <div class="flex-1 bg-emerald-100 rounded-t-lg h-[40%]"></div>
-                <div class="flex-1 bg-emerald-100 rounded-t-lg h-[55%]"></div>
-                <div class="flex-1 bg-emerald-200 rounded-t-lg h-[45%]"></div>
-                <div class="flex-1 bg-emerald-300 rounded-t-lg h-[70%]"></div>
-                <div class="flex-1 bg-emerald-400 rounded-t-lg h-[85%]"></div>
-                <div class="flex-1 bg-primary rounded-t-lg h-[100%]"></div>
-                <div class="flex-1 bg-emerald-200 rounded-t-lg h-[60%]"></div>
-            </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Booking chờ xử lý</div>
+            <div class="text-4xl font-manrope font-extrabold text-primary">@summary.PendingBookings</div>
+            <div class="text-sm text-zinc-500 mt-2">Bao gồm các booking chưa xử lý xong</div>
         </div>
 
-        @* Hoạt động đặt sân *@
-        <div class="bg-primary text-white p-8 rounded-xl shadow-lg relative overflow-hidden group">
-            <h2 class="text-xl font-black font-manrope tracking-tight uppercase mb-2">Hoạt động đặt sân</h2>
-            <div class="space-y-6 mt-8">
-                <div>
-                    <div class="flex justify-between text-xs font-bold uppercase tracking-widest mb-2"><span>Sân Bóng Đá</span><span>75%</span></div>
-                    <div class="h-2 bg-emerald-900/30 rounded-full overflow-hidden"><div class="h-full bg-white w-3/4"></div></div>
-                </div>
-                <div>
-                    <div class="flex justify-between text-xs font-bold uppercase tracking-widest mb-2"><span>Sân Tennis</span><span>45%</span></div>
-                    <div class="h-2 bg-emerald-900/30 rounded-full overflow-hidden"><div class="h-full bg-emerald-300 w-[45%]"></div></div>
-                </div>
-            </div>
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Chờ đặt cọc</div>
+            <div class="text-4xl font-manrope font-extrabold text-amber-600">@summary.PendingDepositBookings</div>
+            <div class="text-sm text-zinc-500 mt-2">Các booking đang chờ khách thanh toán cọc</div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Doanh thu hôm nay</div>
+            <div class="text-4xl font-manrope font-extrabold text-emerald-600">@summary.TodayRevenue.ToString("N0")</div>
+            <div class="text-sm text-zinc-500 mt-2">VNĐ</div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Booking xác nhận hôm nay</div>
+            <div class="text-4xl font-manrope font-extrabold text-sky-600">@summary.TodayConfirmed</div>
+            <div class="text-sm text-zinc-500 mt-2">Số booking đã được xác nhận</div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Sân đang hoạt động</div>
+            <div class="text-4xl font-manrope font-extrabold text-primary">@summary.ActiveFields</div>
+            <div class="text-sm text-zinc-500 mt-2">Số sân có thể phục vụ</div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Sân bảo trì</div>
+            <div class="text-4xl font-manrope font-extrabold text-orange-600">@summary.MaintenanceFields</div>
+            <div class="text-sm text-zinc-500 mt-2">Số sân đang ngưng để bảo trì</div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Sự cố mới</div>
+            <div class="text-4xl font-manrope font-extrabold text-red-600">@summary.NewIncidents</div>
+            <div class="text-sm text-zinc-500 mt-2">Cần ưu tiên kiểm tra</div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+            <div class="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2">Khách hàng hoạt động</div>
+            <div class="text-4xl font-manrope font-extrabold text-violet-600">@summary.ActiveCustomers</div>
+            <div class="text-sm text-zinc-500 mt-2">Khách hàng đang hoạt động trong hệ thống</div>
         </div>
     </div>
 
-    <!-- Recent Bookings Table: Danh sách đặt sân gần đây -->
-    <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-zinc-100">
-        <div class="px-8 py-6 flex justify-between items-center border-b border-zinc-50">
-            <h2 class="text-xl font-black font-manrope tracking-tight uppercase">Đặt sân gần đây</h2>
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="xl:col-span-2 bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-zinc-100">
+                <h3 class="font-manrope font-bold text-xl text-primary">Doanh thu theo tháng (@Model.SelectedYear)</h3>
+            </div>
+
+            @if (Model.RevenueByMonth.Any())
+            {
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[700px]">
+                        <thead class="bg-zinc-50 border-b border-zinc-100">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Tháng</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Số booking</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Doanh thu</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Giá trị TB</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-100">
+                            @foreach (var item in Model.RevenueByMonth.OrderBy(x => x.Month))
+                            {
+                                <tr>
+                                    <td class="px-6 py-4 font-bold text-zinc-700">Tháng @item.Month</td>
+                                    <td class="px-6 py-4 text-zinc-600">@item.TotalBookings</td>
+                                    <td class="px-6 py-4 font-bold text-primary">@item.TotalRevenue.ToString("N0") VNĐ</td>
+                                    <td class="px-6 py-4 text-zinc-600">@item.AvgBookingValue.ToString("N0") VNĐ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="px-6 py-12 text-center text-zinc-500">Chưa có dữ liệu doanh thu theo tháng.</div>
+            }
         </div>
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-surface-container-low">
-                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Khách hàng</th>
-                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Loại sân</th>
-                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Trạng thái</th>
-                    <th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 text-right">Tổng tiền</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-50">
-                <tr class="hover:bg-zinc-50 transition-colors">
-                    <td class="px-8 py-4 text-sm font-bold">Nguyễn Văn Linh</td>
-                    <td class="px-8 py-4 text-sm font-medium">Sân Bóng Đá 5A</td>
-                    <td class="px-8 py-4"><span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase">Thành công</span></td>
-                    <td class="px-8 py-4 text-right text-sm font-bold">450.000đ</td>
-                </tr>
-            </tbody>
-        </table>
+
+        <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-zinc-100">
+                <h3 class="font-manrope font-bold text-xl text-primary">Top dịch vụ doanh thu</h3>
+            </div>
+
+            @if (topServices.Any())
+            {
+                <div class="p-6 space-y-4">
+                    @foreach (var service in topServices)
+                    {
+                        <div class="rounded-2xl border border-zinc-100 p-4">
+                            <div class="font-bold text-zinc-700">@service.ServiceName</div>
+                            <div class="text-sm text-zinc-500 mt-1">SL bán: @service.TotalQuantitySold | Booking: @service.TotalBookings</div>
+                            <div class="text-lg font-extrabold text-primary mt-2">@service.TotalRevenue.ToString("N0") VNĐ</div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="px-6 py-12 text-center text-zinc-500">Chưa có dữ liệu doanh thu dịch vụ.</div>
+            }
+        </div>
     </div>
 </div>

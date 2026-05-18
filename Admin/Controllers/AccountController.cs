@@ -38,7 +38,7 @@ namespace Admin.Controllers
 
             var roleId = loginResult.User?.RoleId ?? 0;
 
-            HttpContext.Session.SetString("AccessToken", loginResult.AccessToken);
+            HttpContext.Session.SetString("AccessToken", loginResult.AccessToken ?? "");
             HttpContext.Session.SetInt32("RoleId", roleId);
             HttpContext.Session.SetString("UserEmail", loginResult.User?.Email ?? "");
             HttpContext.Session.SetString("FullName", loginResult.User?.FullName ?? "");
@@ -65,7 +65,7 @@ namespace Admin.Controllers
             }
 
             HttpContext.Session.Clear();
-            ModelState.AddModelError("", "Vai trò tài khoản không hợp lệ.");
+            ModelState.AddModelError("", $"Vai trò tài khoản không hợp lệ.");
             return View(model);
         }
 

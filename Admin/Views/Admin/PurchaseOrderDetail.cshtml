@@ -1,0 +1,142 @@
+﻿@model Admin.ViewModels.PurchaseOrders.PurchaseOrderDetailVm
+
+@{
+    ViewData["Title"] = "Chi tiết nhập kho";
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Chi tiết đơn nhập kho
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Xem thông tin đơn nhập, sản phẩm nhập và xác nhận nhập kho.
+            </p>
+            <a asp-action="PurchaseOrders" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                <span>Quay lại danh sách</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-3xl border border-zinc-100 shadow-sm p-8 space-y-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="font-manrope font-bold text-2xl text-primary">PO-@Model.PurchaseOrderId.ToString("D4")</h3>
+                    <p class="text-sm text-zinc-500 mt-2">Người tạo: @Model.CreatedBy</p>
+                </div>
+                <span class="inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full @(Model.StatusId == 3 ? "bg-red-50 text-red-700" : Model.StatusId == 2 ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-700")">
+                    <span class="w-2 h-2 rounded-full @(Model.StatusId == 3 ? "bg-red-500" : Model.StatusId == 2 ? "bg-emerald-500" : "bg-zinc-500")"></span>
+                    @Model.Status
+                </span>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-100 p-5">
+                <h4 class="font-bold text-zinc-700 mb-3">Nhà cung cấp</h4>
+                <div class="space-y-2 text-sm text-zinc-600">
+                    <div><span class="font-bold">Tên:</span> @Model.Supplier.Name</div>
+                    <div><span class="font-bold">Người liên hệ:</span> @Model.Supplier.ContactName</div>
+                    <div><span class="font-bold">SĐT:</span> @Model.Supplier.Phone</div>
+                    <div><span class="font-bold">Email:</span> @Model.Supplier.Email</div>
+                    <div><span class="font-bold">Địa chỉ:</span> @Model.Supplier.Address</div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-100 p-5">
+                <h4 class="font-bold text-zinc-700 mb-4">Danh sách sản phẩm nhập</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[700px]">
+                        <thead>
+                            <tr class="border-b border-zinc-100">
+                                <th class="text-left py-3 text-xs uppercase tracking-wider text-zinc-400">Sản phẩm</th>
+                                <th class="text-left py-3 text-xs uppercase tracking-wider text-zinc-400">Đơn vị</th>
+                                <th class="text-left py-3 text-xs uppercase tracking-wider text-zinc-400">Số lượng</th>
+                                <th class="text-left py-3 text-xs uppercase tracking-wider text-zinc-400">Đơn giá</th>
+                                <th class="text-left py-3 text-xs uppercase tracking-wider text-zinc-400">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-100">
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="py-4 font-bold text-zinc-700">@item.ProductName</td>
+                                    <td class="py-4 text-zinc-600">@item.Unit</td>
+                                    <td class="py-4 text-zinc-600">@item.Quantity</td>
+                                    <td class="py-4 text-zinc-600">@item.UnitPrice.ToString("N0") VNĐ</td>
+                                    <td class="py-4 font-bold text-primary">@item.SubTotal.ToString("N0") VNĐ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Note))
+            {
+                <div class="rounded-2xl border border-zinc-100 p-5">
+                    <h4 class="font-bold text-zinc-700 mb-2">Ghi chú</h4>
+                    <p class="text-sm text-zinc-600">@Model.Note</p>
+                </div>
+            }
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+                <h4 class="font-bold text-zinc-700 mb-4">Tổng quan</h4>
+                <div class="space-y-2 text-sm text-zinc-600">
+                    <div><span class="font-bold">Tổng tiền:</span> @Model.TotalAmount.ToString("N0") VNĐ</div>
+                    <div><span class="font-bold">Số mặt hàng:</span> @Model.Items.Count</div>
+                </div>
+            </div>
+
+            @if (Model.StatusId == 1)
+            {
+                <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6 space-y-4">
+                    <h4 class="font-bold text-zinc-700">Thao tác</h4>
+
+                    <form asp-action="ConfirmPurchaseOrder" asp-route-id="@Model.PurchaseOrderId" method="post"
+                          onsubmit="return confirm('Xác nhận nhập kho cho đơn này?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                            <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                            Xác nhận nhập kho
+                        </button>
+                    </form>
+
+                    <form asp-action="CancelPurchaseOrder" asp-route-id="@Model.PurchaseOrderId" method="post"
+                          onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn nhập này?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl bg-red-600 text-white text-sm font-bold shadow-lg">
+                            <span class="material-symbols-outlined text-[20px]">cancel</span>
+                            Hủy đơn nhập
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            const successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+            if (typeof Swal !== "undefined" && successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

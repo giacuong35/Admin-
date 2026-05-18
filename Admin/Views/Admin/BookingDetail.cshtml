@@ -1,0 +1,261 @@
+﻿@model Admin.ViewModels.Bookings.BookingDetailVm
+@{
+    ViewData["Title"] = "Chi tiết booking";
+    var payments = ViewBag.Payments as List<Admin.ViewModels.Bookings.PaymentVm> ?? new();
+    var deposit = ViewBag.Deposit as Admin.ViewModels.Bookings.DepositVm;
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Chi tiết booking
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Theo dõi thông tin đặt sân, đặt cọc, thanh toán và dịch vụ sử dụng.
+            </p>
+            <a asp-action="Bookings" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                <span>Quay lại danh sách booking</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white rounded-3xl border border-zinc-100 shadow-sm p-8 space-y-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="font-manrope font-bold text-2xl text-primary">BK-@Model.BookingId.ToString("D5")</h3>
+                    <p class="text-sm text-zinc-500 mt-2">Tạo lúc: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+                <span class="inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full @(Model.StatusId == 4 ? "bg-red-50 text-red-700" : Model.StatusId == 3 ? "bg-emerald-50 text-emerald-700" : Model.StatusId == 5 ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-700")">
+                    <span class="w-2 h-2 rounded-full @(Model.StatusId == 4 ? "bg-red-500" : Model.StatusId == 3 ? "bg-emerald-500" : Model.StatusId == 5 ? "bg-amber-500" : "bg-zinc-500")"></span>
+                    @Model.Status
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="rounded-2xl border border-zinc-100 p-5">
+                    <h4 class="font-bold text-zinc-700 mb-3">Khách hàng</h4>
+                    <div class="space-y-2 text-sm text-zinc-600">
+                        <div><span class="font-bold">Họ tên:</span> @Model.Customer.FullName</div>
+                        <div><span class="font-bold">Email:</span> @Model.Customer.Email</div>
+                        <div><span class="font-bold">SĐT:</span> @Model.Customer.Phone</div>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-zinc-100 p-5">
+                    <h4 class="font-bold text-zinc-700 mb-3">Thông tin tiền</h4>
+                    <div class="space-y-2 text-sm text-zinc-600">
+                        <div><span class="font-bold">Tạm tính:</span> @((Model.SubTotal ?? 0).ToString("N0")) VNĐ</div>
+                        <div><span class="font-bold">Giảm giá:</span> @Model.DiscountAmount.ToString("N0") VNĐ</div>
+                        <div><span class="font-bold">Thuế:</span> @Model.TaxAmount.ToString("N0") VNĐ</div>
+                        <div><span class="font-bold">Tổng tiền:</span> @((Model.TotalAmount ?? 0).ToString("N0")) VNĐ</div>
+                        <div><span class="font-bold">Tiền cọc:</span> @Model.DepositAmount.ToString("N0") VNĐ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-100 p-5">
+                <h4 class="font-bold text-zinc-700 mb-4">Slot đã đặt</h4>
+                <div class="space-y-3">
+                    @foreach (var slot in Model.Details)
+                    {
+                        <div class="flex items-center justify-between border border-zinc-100 rounded-xl px-4 py-3 text-sm">
+                            <div>
+                                <div class="font-bold text-zinc-700">@slot.FieldName (@slot.FieldType)</div>
+                                <div class="text-zinc-500 mt-1">@slot.SlotDate.ToString("dd/MM/yyyy") - @slot.StartTime đến @slot.EndTime</div>
+                            </div>
+                            <div class="font-bold text-primary">@slot.Price.ToString("N0") VNĐ</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-zinc-100 p-5">
+                <h4 class="font-bold text-zinc-700 mb-4">Dịch vụ kèm theo</h4>
+                @if (Model.Services.Any())
+                {
+                    <div class="space-y-3">
+                        @foreach (var s in Model.Services)
+                        {
+                            <div class="flex items-center justify-between border border-zinc-100 rounded-xl px-4 py-3 text-sm">
+                                <div>
+                                    <div class="font-bold text-zinc-700">@s.ServiceName</div>
+                                    <div class="text-zinc-500 mt-1">SL: @s.Quantity x @s.UnitPrice.ToString("N0") VNĐ</div>
+                                </div>
+                                <div class="font-bold text-primary">@s.Total.ToString("N0") VNĐ</div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-sm text-zinc-500">Không có dịch vụ đi kèm.</div>
+                }
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Note) || !string.IsNullOrWhiteSpace(Model.CancelReason))
+            {
+                <div class="rounded-2xl border border-zinc-100 p-5 space-y-3">
+                    @if (!string.IsNullOrWhiteSpace(Model.Note))
+                    {
+                        <div>
+                            <h4 class="font-bold text-zinc-700 mb-2">Ghi chú</h4>
+                            <p class="text-sm text-zinc-600">@Model.Note</p>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.CancelReason))
+                    {
+                        <div>
+                            <h4 class="font-bold text-red-700 mb-2">Lý do hủy</h4>
+                            <p class="text-sm text-red-600">@Model.CancelReason</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+                <h4 class="font-bold text-zinc-700 mb-4">Đặt cọc</h4>
+                @if (deposit != null)
+                {
+                    <div class="space-y-2 text-sm text-zinc-600">
+                        <div><span class="font-bold">Cần cọc:</span> @deposit.RequiredAmount.ToString("N0") VNĐ</div>
+                        <div><span class="font-bold">Đã cọc:</span> @deposit.PaidAmount.ToString("N0") VNĐ</div>
+                        <div><span class="font-bold">Trạng thái:</span> @deposit.Status</div>
+                        <div><span class="font-bold">Deadline:</span> @deposit.DeadlineAt.ToString("dd/MM/yyyy HH:mm")</div>
+                        <div><span class="font-bold">PaidAt:</span> @(deposit.PaidAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-sm text-zinc-500">Không có dữ liệu đặt cọc.</div>
+                }
+            </div>
+
+            <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+                <h4 class="font-bold text-zinc-700 mb-4">Thanh toán</h4>
+                @if (payments.Any())
+                {
+                    <div class="space-y-3">
+                        @foreach (var p in payments)
+                        {
+                            <div class="rounded-xl border border-zinc-100 px-4 py-3 text-sm">
+                                <div class="font-bold text-zinc-700">@p.Amount.ToString("N0") VNĐ</div>
+                                <div class="text-zinc-500 mt-1">@p.PaymentMethod - @p.Status</div>
+                                <div class="text-zinc-400 mt-1">PaidAt: @(p.PaidAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-sm text-zinc-500">Chưa có lịch sử thanh toán.</div>
+                }
+            </div>
+
+            @{
+                var hasSuccessfulPayment = payments.Any(x => x.StatusId == 2);
+            }
+
+            <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6 space-y-4">
+                <h4 class="font-bold text-zinc-700">Thao tác</h4>
+
+                @if (Model.StatusId == 2)
+                {
+                    <a asp-action="RecordBookingPayment" asp-route-id="@Model.BookingId"
+                       class="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                        <span class="material-symbols-outlined text-[20px]">payments</span>
+                        Ghi nhận thanh toán
+                    </a>
+
+                    @if (hasSuccessfulPayment)
+                    {
+                        <form asp-action="CompleteBooking" asp-route-id="@Model.BookingId" method="post"
+                              onsubmit="return confirm('Xác nhận hoàn thành booking này sau khi khách đã sử dụng xong?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 text-white text-sm font-bold shadow-lg">
+                                <span class="material-symbols-outlined text-[20px]">task_alt</span>
+                                Hoàn thành booking
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="rounded-2xl bg-amber-50 border border-amber-200 px-4 py-4 text-sm text-amber-700 font-semibold">
+                            Cần ghi nhận thanh toán trước khi hoàn thành booking.
+                        </div>
+                    }
+
+                    <form asp-action="CancelBooking" asp-route-id="@Model.BookingId" method="post" class="space-y-3"
+                          onsubmit="return confirm('Bạn chắc chắn muốn hủy booking này?');">
+                        @Html.AntiForgeryToken()
+                        <textarea name="Reason" rows="3" placeholder="Lý do hủy (không bắt buộc)"
+                              class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm resize-none"></textarea>
+                        <button type="submit"
+                                class="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl bg-red-600 text-white text-sm font-bold shadow-lg">
+                            <span class="material-symbols-outlined text-[20px]">cancel</span>
+                            Hủy booking
+                        </button>
+                    </form>
+                }
+                else if (Model.StatusId == 4)
+                {
+                    <div class="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-4 text-sm text-emerald-700 font-semibold">
+                        Booking này đã hoàn thành.
+                    </div>
+                }
+                else if (Model.StatusId == 3)
+                {
+                    <div class="rounded-2xl bg-red-50 border border-red-200 px-4 py-4 text-sm text-red-700 font-semibold">
+                        Booking này đã bị hủy.
+                    </div>
+                }
+                else
+                {
+                    <a asp-action="RecordBookingPayment" asp-route-id="@Model.BookingId"
+                       class="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                        <span class="material-symbols-outlined text-[20px]">payments</span>
+                        Ghi nhận thanh toán
+                    </a>
+
+                    <form asp-action="CancelBooking" asp-route-id="@Model.BookingId" method="post" class="space-y-3"
+                          onsubmit="return confirm('Bạn chắc chắn muốn hủy booking này?');">
+                        @Html.AntiForgeryToken()
+                        <textarea name="Reason" rows="3" placeholder="Lý do hủy (không bắt buộc)"
+                              class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm resize-none"></textarea>
+                        <button type="submit"
+                                class="w-full inline-flex justify-center items-center gap-2 px-5 py-3 rounded-2xl bg-red-600 text-white text-sm font-bold shadow-lg">
+                            <span class="material-symbols-outlined text-[20px]">cancel</span>
+                            Hủy booking
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            const successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+            if (typeof Swal !== "undefined" && successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

@@ -97,7 +97,7 @@
             </a>
 
             @* 5. Kho hàng *@
-            <a href="@Url.Action("Inventory", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Inventory" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+            <a href="@Url.Action("Products", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Products" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
                 <span class="material-symbols-outlined">inventory_2</span>
                 <span class="font-medium">Kho hàng</span>
             </a>
@@ -121,18 +121,24 @@
             </a>
 
             @* 9. Đặt sân *@
-            <a href="@Url.Action("Booking", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Booking" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+            <a href="@Url.Action("Bookings", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Bookings" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
                 <span class="material-symbols-outlined">calendar_month</span>
-                <span class="font-medium">Đặt sân</span>
+                <span class="font-medium">Quản lí đặt sân</span>
+            </a>
+
+            @* 10. Hóa đơn *@
+            <a href="@Url.Action("Invoices", "Admin")"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @((currentAction == "Invoices" || currentAction == "InvoiceDetail") ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span class="font-medium">Hóa đơn</span>
             </a>
         </nav>
 
-        <div class="p-4 mt-auto">
-            <button class="w-full flex items-center justify-center gap-2 py-4 rounded-xl hero-gradient text-white font-bold shadow-lg">
-                <span class="material-symbols-outlined">add_circle</span>
-                <span>Đặt sân mới</span>
-            </button>
-        </div>
+        <a href="@Url.Action("CreateAdminWalkInBooking", "Admin")"
+           class="inline-flex items-center justify-center gap-2 rounded-2xl hero-gradient text-white font-bold px-5 py-4 w-full shadow-lg">
+            <span class="material-symbols-outlined text-[22px]">calendar_add_on</span>
+            <span>Đặt sân mới</span>
+        </a>
     </aside>
 
     <main class="ml-64 min-h-screen flex flex-col">

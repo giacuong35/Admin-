@@ -1,0 +1,155 @@
+﻿@model Admin.ViewModels.Common.PagedResult<Admin.ViewModels.Products.ProductListItemVm>
+
+@{
+    ViewData["Title"] = "Kho hàng";
+    var search = ViewBag.Search as string ?? "";
+    bool? lowStockOnly = ViewBag.LowStockOnly as bool?;
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Quản lý kho hàng
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Quản lý sản phẩm kho, theo dõi tồn kho hiện tại và cảnh báo sắp hết hàng.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
+        <form asp-action="Products" method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Tìm kiếm</label>
+                <input type="text" name="search" value="@search" placeholder="Tên sản phẩm..."
+                       class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Lọc tồn kho</label>
+                <select name="lowStockOnly" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm">
+                    <option value="" selected="@(lowStockOnly == null)">Tất cả</option>
+                    <option value="true" selected="@(lowStockOnly == true)">Sắp hết hàng</option>
+                    <option value="false" selected="@(lowStockOnly == false)">Hàng bình thường</option>
+                </select>
+            </div>
+
+            <div class="flex items-end gap-3">
+                <button type="submit" class="px-5 py-3 rounded-xl hero-gradient text-white text-sm font-bold">Lọc</button>
+                <a asp-action="Products" class="px-5 py-3 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600">Xóa lọc</a>
+            </div>
+        </form>
+
+        <div class="mt-4 flex justify-end">
+            <a asp-action="CreateProduct"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                <span>Thêm sản phẩm</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-100">
+            <h3 class="font-manrope font-bold text-xl text-primary">Danh sách sản phẩm kho</h3>
+        </div>
+
+        @if (Model != null && Model.Items.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1000px]">
+                    <thead class="bg-zinc-50 border-b border-zinc-100">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Mã SP</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Tên sản phẩm</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Đơn vị</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Tồn kho</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Mức cảnh báo</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Trạng thái</th>
+                            <th class="px-6 py-4 text-right text-[11px] font-black uppercase tracking-widest text-zinc-400">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-100">
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr class="hover:bg-zinc-50/60 transition-all">
+                                <td class="px-6 py-5 font-bold text-zinc-700">PRD-@item.ProductId.ToString("D4")</td>
+                                <td class="px-6 py-5 font-bold text-on-surface">@item.Name</td>
+                                <td class="px-6 py-5 text-zinc-600">@(string.IsNullOrWhiteSpace(item.Unit) ? "-" : item.Unit)</td>
+                                <td class="px-6 py-5 font-bold @(item.IsLowStock ? "text-red-600" : "text-primary")">@item.StockQty</td>
+                                <td class="px-6 py-5 text-zinc-600">@item.MinQty</td>
+                                <td class="px-6 py-5">
+                                    @if (item.IsLowStock)
+                                    {
+                                        <span class="inline-flex items-center gap-2 text-xs font-bold text-red-700 bg-red-50 px-3 py-1.5 rounded-full">
+                                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                            Sắp hết hàng
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            Bình thường
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-6 py-5 text-right">
+                                    <div class="flex justify-end gap-2">
+                                        <a asp-action="EditProduct" asp-route-id="@item.ProductId"
+                                           class="p-2 text-primary hover:bg-emerald-50 rounded-lg transition-all"
+                                           title="Chỉnh sửa">
+                                            <span class="material-symbols-outlined text-[20px]">edit</span>
+                                        </a>
+
+                                        <form asp-action="DeleteProduct" asp-route-id="@item.ProductId" method="post" class="inline"
+                                              onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                    title="Xóa">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-6 py-4 border-t border-zinc-100 flex items-center justify-between text-sm text-zinc-500">
+                <div>Tổng: <span class="font-bold text-zinc-700">@Model.TotalCount</span> sản phẩm</div>
+                <div>Trang <span class="font-bold text-zinc-700">@Model.Page</span> / @Model.TotalPages</div>
+            </div>
+        }
+        else
+        {
+            <div class="px-6 py-16 text-center text-zinc-500">
+                Không có sản phẩm nào trong kho.
+            </div>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            const successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+            if (typeof Swal !== "undefined" && successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

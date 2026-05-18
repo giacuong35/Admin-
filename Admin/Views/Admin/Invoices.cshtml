@@ -1,0 +1,82 @@
+﻿@model Admin.ViewModels.Invoices.InvoicePageVm
+
+@{
+    ViewData["Title"] = "Hóa đơn";
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Hóa đơn
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Danh sách hóa đơn thanh toán thành công trong ngày.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6">
+        <form method="get" class="flex flex-wrap items-end gap-4">
+            <div>
+                <label class="block text-sm font-bold text-zinc-700 mb-2">Ngày</label>
+                <input type="date" name="date" value="@Model.Date.ToString("yyyy-MM-dd")"
+                       class="rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+            </div>
+
+            <button type="submit"
+                    class="px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                Lọc hóa đơn
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-zinc-100">
+            <h3 class="text-xl font-bold text-zinc-800">Danh sách hóa đơn</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-zinc-50">
+                    <tr class="text-left">
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Mã hóa đơn</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Khách hàng</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Số tiền</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-zinc-500 text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items == null || !Model.Items.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="px-6 py-10 text-center text-zinc-500">
+                                Không có hóa đơn trong ngày này.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr class="border-t border-zinc-100">
+                                <td class="px-6 py-5 font-bold text-zinc-800">@item.InvoiceCode</td>
+                                <td class="px-6 py-5 text-zinc-700">@item.CustomerName</td>
+                                <td class="px-6 py-5 font-bold text-emerald-700">
+                                    @item.Amount.ToString("N0") VNĐ
+                                </td>
+                                <td class="px-6 py-5 text-right">
+                                    <a asp-action="InvoiceDetail" asp-route-id="@item.PaymentId"
+                                       class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-zinc-200 text-sm font-bold text-zinc-700 hover:border-emerald-300">
+                                        <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,134 @@
+﻿@model Admin.ViewModels.Common.PagedResult<Admin.ViewModels.PurchaseOrders.PurchaseOrderListItemVm>
+
+@{
+    ViewData["Title"] = "Nhập kho";
+    int? selectedSupplierId = ViewBag.SupplierId as int?;
+    int? selectedStatusId = ViewBag.StatusId as int?;
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Quản lý nhập kho
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Theo dõi danh sách đơn nhập hàng từ nhà cung cấp và xác nhận nhập kho.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
+        <form asp-action="PurchaseOrders" method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Mã nhà cung cấp</label>
+                <input type="number" name="supplierId" value="@selectedSupplierId" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Trạng thái</label>
+                <select name="statusId" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm">
+                    <option value="">Tất cả</option>
+                    <option value="1" selected="@(selectedStatusId == 1)">Mới tạo</option>
+                    <option value="2" selected="@(selectedStatusId == 2)">Đã xác nhận</option>
+                    <option value="3" selected="@(selectedStatusId == 3)">Đã hủy</option>
+                </select>
+            </div>
+
+            <div class="flex items-end gap-3">
+                <button type="submit" class="px-5 py-3 rounded-xl hero-gradient text-white text-sm font-bold">Lọc</button>
+                <a asp-action="PurchaseOrders" class="px-5 py-3 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600">Xóa lọc</a>
+            </div>
+        </form>
+
+        <div class="mt-4 flex justify-end">
+            <a asp-action="CreatePurchaseOrder"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+                <span>Tạo đơn nhập kho</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-100">
+            <h3 class="font-manrope font-bold text-xl text-primary">Danh sách đơn nhập kho</h3>
+        </div>
+
+        @if (Model != null && Model.Items.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1100px]">
+                    <thead class="bg-zinc-50 border-b border-zinc-100">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Mã đơn</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Nhà cung cấp</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Người tạo</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Tổng tiền</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Trạng thái</th>
+                            <th class="px-6 py-4 text-right text-[11px] font-black uppercase tracking-widest text-zinc-400">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-100">
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr class="hover:bg-zinc-50/60 transition-all">
+                                <td class="px-6 py-5 font-bold text-zinc-700">PO-@item.PurchaseOrderId.ToString("D4")</td>
+                                <td class="px-6 py-5">
+                                    <div class="font-bold text-on-surface">@item.Supplier.Name</div>
+                                    <div class="text-xs text-zinc-500 mt-1">@item.Supplier.ContactName</div>
+                                </td>
+                                <td class="px-6 py-5 text-zinc-600">@item.CreatedBy</td>
+                                <td class="px-6 py-5 font-bold text-primary">@item.TotalAmount.ToString("N0") VNĐ</td>
+                                <td class="px-6 py-5">
+                                    <span class="inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full @(item.StatusId == 3 ? "bg-red-50 text-red-700" : item.StatusId == 2 ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-700")">
+                                        <span class="w-2 h-2 rounded-full @(item.StatusId == 3 ? "bg-red-500" : item.StatusId == 2 ? "bg-emerald-500" : "bg-zinc-500")"></span>
+                                        @item.Status
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 text-right">
+                                    <a asp-action="PurchaseOrderDetail" asp-route-id="@item.PurchaseOrderId"
+                                       class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 text-sm font-bold text-primary hover:bg-emerald-50">
+                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-6 py-4 border-t border-zinc-100 flex items-center justify-between text-sm text-zinc-500">
+                <div>Tổng: <span class="font-bold text-zinc-700">@Model.TotalCount</span> đơn nhập</div>
+                <div>Trang <span class="font-bold text-zinc-700">@Model.Page</span> / @Model.TotalPages</div>
+            </div>
+        }
+        else
+        {
+            <div class="px-6 py-16 text-center text-zinc-500">
+                Không có đơn nhập kho nào.
+            </div>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            const successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+            if (typeof Swal !== "undefined" && successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

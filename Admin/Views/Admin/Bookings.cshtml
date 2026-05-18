@@ -1,0 +1,154 @@
+﻿@model Admin.ViewModels.Common.PagedResult<Admin.ViewModels.Bookings.BookingListItemVm>
+
+@{
+    ViewData["Title"] = "Quản lý đặt sân";
+    int? selectedStatus = ViewBag.StatusId as int?;
+    string dateFrom = ViewBag.DateFrom as string ?? "";
+    string dateTo = ViewBag.DateTo as string ?? "";
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Quản lý đặt sân
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Quản lý danh sách booking, lọc trạng thái và xem chi tiết từng đơn đặt sân.
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
+        <form asp-action="Bookings" method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Mã khách hàng</label>
+                <input type="number" name="userId" value="@ViewBag.UserId" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Trạng thái</label>
+                <select name="statusId" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm">
+                    <option value="">Tất cả</option>
+                    <option value="1" selected="@(selectedStatus == 1)">Mới tạo</option>
+                    <option value="2" selected="@(selectedStatus == 2)">Đã xác nhận</option>
+                    <option value="3" selected="@(selectedStatus == 3)">Đã hủy</option> <a href="#"></a>``~
+                6U,J
+
+                +0\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\-=-==]
+                [[pdyuhi895
+                ]]
+                    <option value="4" selected="@(selectedStatus == 4)">Đã hoàn thành</option>
+                    <option value="5" selected="@(selectedStatus == 5)">Chờ đặt cọc</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Từ ngày</label>
+                <input type="date" name="dateFrom" value="@dateFrom" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Đến ngày</label>
+                <input type="date" name="dateTo" value="@dateTo" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-zinc-500 mb-2">Mã sân</label>
+                <input type="number" name="fieldId" value="@ViewBag.FieldId" class="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm" />
+            </div>
+
+            <div class="md:col-span-5 flex justify-end gap-3">
+                <a asp-action="Bookings" class="px-5 py-3 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600">Xóa lọc</a>
+                <button type="submit" class="px-5 py-3 rounded-xl hero-gradient text-white text-sm font-bold">Lọc booking</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-zinc-100">
+            <h3 class="font-manrope font-bold text-xl text-primary">Danh sách booking</h3>
+        </div>
+
+        @if (Model != null && Model.Items.Any())
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[1100px]">
+                    <thead class="bg-zinc-50 border-b border-zinc-100">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Mã booking</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Khách hàng</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Sân</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Slot đầu tiên</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Tổng tiền</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Trạng thái</th>
+                            <th class="px-6 py-4 text-right text-[11px] font-black uppercase tracking-widest text-zinc-400">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-100">
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr class="hover:bg-zinc-50/60 transition-all">
+                                <td class="px-6 py-5 font-bold text-zinc-700">BK-@item.BookingId.ToString("D5")</td>
+                                <td class="px-6 py-5">
+                                    <div class="font-bold text-on-surface">@item.CustomerName</div>
+                                    <div class="text-xs text-zinc-500 mt-1">@item.CustomerPhone</div>
+                                </td>
+                                <td class="px-6 py-5 text-sm text-zinc-600">@(item.FieldName ?? "-")</td>
+                                <td class="px-6 py-5 text-sm text-zinc-600">
+                                    @(item.EarliestSlotDate?.ToString("dd/MM/yyyy") ?? "-")
+                                    <div class="text-xs text-zinc-400 mt-1">@item.EarliestSlotTime</div>
+                                </td>
+                                <td class="px-6 py-5 font-bold text-primary">@((item.TotalAmount ?? 0).ToString("N0")) VNĐ</td>
+                                <td class="px-6 py-5">
+                                    <span class="inline-flex items-center gap-2 text-xs font-bold px-3 py-1.5 rounded-full @(item.StatusId == 3 ? "bg-red-50 text-red-700" : item.StatusId == 4 ? "bg-emerald-50 text-emerald-700" : item.StatusId == 5 ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-700")">
+                                        <span class="w-2 h-2 rounded-full @(item.StatusId == 3 ? "bg-red-500" : item.StatusId == 4 ? "bg-emerald-500" : item.StatusId == 5 ? "bg-amber-500" : "bg-zinc-500")"></span>
+                                        @item.Status
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 text-right">
+                                    <a asp-action="BookingDetail" asp-route-id="@item.BookingId"
+                                       class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 text-sm font-bold text-primary hover:bg-emerald-50">
+                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-6 py-4 border-t border-zinc-100 flex items-center justify-between text-sm text-zinc-500">
+                <div>Tổng: <span class="font-bold text-zinc-700">@Model.TotalCount</span> booking</div>
+                <div>Trang <span class="font-bold text-zinc-700">@Model.Page</span> / @Model.TotalPages</div>
+            </div>
+        }
+        else
+        {
+            <div class="px-6 py-16 text-center text-zinc-500">
+                Không có booking nào phù hợp bộ lọc.
+            </div>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('load', function () {
+            var successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage,
+                    confirmButtonColor: '#006418',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    </script>
+}

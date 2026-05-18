@@ -1,10 +1,17 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using Admin.ViewModels.Auth;
+﻿using Admin.ViewModels.Auth;
+using Admin.ViewModels.Bookings;
 using Admin.ViewModels.Common;
-using Admin.ViewModels.Users;
+using Admin.ViewModels.Dashboard;
 using Admin.ViewModels.Fields;
+using Admin.ViewModels.Invoices;
+using Admin.ViewModels.Products;
+using Admin.ViewModels.PurchaseOrders;
 using Admin.ViewModels.Services;
+using Admin.ViewModels.Suppliers;
+using Admin.ViewModels.Users;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 
 namespace Admin.Services.Api
 {
@@ -44,7 +51,7 @@ namespace Admin.Services.Api
 
             var response = await client.PostAsJsonAsync("api/auth/login", new
             {
-                email = model.Email,
+                identifier = model.Email,
                 password = model.Password
             });
 
@@ -295,6 +302,460 @@ namespace Admin.Services.Api
 
             var response = await client.DeleteAsync($"api/services/{serviceId}");
             response.EnsureSuccessStatusCode();
+        }
+
+
+        // =========================
+        // BOOKINGS
+        // =========================
+        public async Task<PagedResult<BookingListItemVm>> GetBookingsAsync(
+    int? userId = null,
+    int? statusId = null,
+    DateTime? dateFrom = null,
+    DateTime? dateTo = null,
+    int? fieldId = null,
+    int page = 1,
+    int pageSize = 20)
+        {
+            var client = CreateClient();
+
+            var query = $"api/bookings?page={page}&pageSize={pageSize}";
+
+            if (userId.HasValue)
+                query += $"&userId={userId.Value}";
+
+            if (statusId.HasValue)
+                query += $"&statusId={statusId.Value}";
+
+            if (dateFrom.HasValue)
+                query += $"&dateFrom={dateFrom.Value:yyyy-MM-dd}";
+
+            if (dateTo.HasValue)
+                query += $"&dateTo={dateTo.Value:yyyy-MM-dd}";
+
+            if (fieldId.HasValue)
+                query += $"&fieldId={fieldId.Value}";
+
+            var response = await client.GetAsync(query);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<PagedResult<BookingListItemVm>>>();
+            return result?.Data ?? new PagedResult<BookingListItemVm>();
+        }
+
+        public async Task<BookingDetailVm?> GetBookingByIdAsync(int bookingId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/bookings/{bookingId}");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<BookingDetailVm>>();
+            return result?.Data;
+        }
+
+        public async Task CancelBookingAsync(int bookingId, CancelBookingVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync($"api/bookings/{bookingId}/cancel", new
+            {
+                reason = model.Reason
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task RecordBookingPaymentAsync(int bookingId, RecordBookingPaymentVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync($"api/bookings/{bookingId}/payment", new
+            {
+                methodId = model.MethodId,
+                transactionCode = model.TransactionCode,
+                note = model.Note
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<List<PaymentVm>> GetBookingPaymentsAsync(int bookingId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/bookings/{bookingId}/payments");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<List<PaymentVm>>>();
+            return result?.Data ?? new List<PaymentVm>();
+        }
+
+        public async Task<DepositVm?> GetBookingDepositAsync(int bookingId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/bookings/{bookingId}/deposit");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<DepositVm>>();
+            return result?.Data;
+        }
+
+
+        public async Task CreateAdminWalkInBookingAsync(CreateAdminWalkInBookingVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync("api/bookings/admin/walk-in", new
+            {
+                customerId = model.IsGuest ? null : model.CustomerId,
+                isGuest = model.IsGuest,
+                guestName = model.IsGuest
+                    ? (string.IsNullOrWhiteSpace(model.GuestName) ? "Khách vãng lai" : model.GuestName)
+                    : null,
+                guestPhone = model.IsGuest ? model.GuestPhone : null,
+                fieldSlotIds = model.SelectedSlotIds,
+                services = new List<object>(),
+                promotionCode = model.PromotionCode,
+                note = model.Note,
+                paymentOption = model.IsFullPayment ? 2 : 1,
+                paymentMethodId = model.IsFullPayment ? model.PaymentMethodId : null,
+                transactionCode = model.IsFullPayment ? model.TransactionCode : null
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task CompleteBookingAsync(int bookingId)
+        {
+            var client = CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"api/bookings/{bookingId}/complete");
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<string> GetFieldScheduleRawAsync(DateTime date, int? fieldId = null, int? typeId = null)
+        {
+            var client = CreateClient();
+
+            var query = $"api/fields/schedule?date={date:yyyy-MM-dd}";
+
+            if (fieldId.HasValue)
+                query += $"&fieldId={fieldId.Value}";
+
+            if (typeId.HasValue)
+                query += $"&typeId={typeId.Value}";
+
+            var response = await client.GetAsync(query);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
+        }
+        // =========================
+        // DASHBOARD
+        // =========================
+
+
+
+        public async Task<DashboardSummaryVm?> GetDashboardSummaryAsync()
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync("api/dashboard/summary");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<DashboardSummaryVm>>();
+            return result?.Data;
+        }
+
+        public async Task<List<RevenueByMonthVm>> GetRevenueByMonthAsync(int? year = null)
+        {
+            var client = CreateClient();
+
+            var url = "api/dashboard/revenue-by-month";
+            if (year.HasValue)
+                url += $"?year={year.Value}";
+
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<List<RevenueByMonthVm>>>();
+            return result?.Data ?? new List<RevenueByMonthVm>();
+        }
+
+        public async Task<List<FieldOccupancyVm>> GetFieldOccupancyAsync(int? year = null, int? month = null)
+        {
+            var client = CreateClient();
+
+            var queries = new List<string>();
+            if (year.HasValue) queries.Add($"year={year.Value}");
+            if (month.HasValue) queries.Add($"month={month.Value}");
+
+            var url = "api/dashboard/field-occupancy";
+            if (queries.Any())
+                url += "?" + string.Join("&", queries);
+
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<List<FieldOccupancyVm>>>();
+            return result?.Data ?? new List<FieldOccupancyVm>();
+        }
+
+        public async Task<List<RevenueByServiceVm>> GetRevenueByServiceAsync()
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync("api/dashboard/revenue-by-service");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<List<RevenueByServiceVm>>>();
+            return result?.Data ?? new List<RevenueByServiceVm>();
+        }
+
+
+
+
+        // =========================
+        // SUPPLIERS
+        // =========================
+
+        public async Task<PagedResult<SupplierListItemVm>> GetSuppliersAsync(string? search = null, int page = 1, int pageSize = 20)
+        {
+            var client = CreateClient();
+
+            var query = $"api/suppliers?page={page}&pageSize={pageSize}";
+            if (!string.IsNullOrWhiteSpace(search))
+                query += $"&search={Uri.EscapeDataString(search)}";
+
+            var response = await client.GetAsync(query);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<PagedResult<SupplierListItemVm>>>();
+            return result?.Data ?? new PagedResult<SupplierListItemVm>();
+        }
+
+        public async Task<SupplierListItemVm?> GetSupplierByIdAsync(int supplierId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/suppliers/{supplierId}");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<SupplierListItemVm>>();
+            return result?.Data;
+        }
+
+        public async Task CreateSupplierAsync(CreateSupplierVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync("api/suppliers", new
+            {
+                name = model.Name,
+                contactName = model.ContactName,
+                phone = model.Phone,
+                email = model.Email,
+                address = model.Address
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task UpdateSupplierAsync(int supplierId, UpdateSupplierVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PutAsJsonAsync($"api/suppliers/{supplierId}", new
+            {
+                name = model.Name,
+                contactName = model.ContactName,
+                phone = model.Phone,
+                email = model.Email,
+                address = model.Address
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task DeleteSupplierAsync(int supplierId)
+        {
+            var client = CreateClient();
+
+            var response = await client.DeleteAsync($"api/suppliers/{supplierId}");
+            response.EnsureSuccessStatusCode();
+        }
+
+        // =========================
+        // Product
+        // =========================
+
+
+        public async Task<PagedResult<ProductListItemVm>> GetProductsAsync(string? search = null, bool? lowStockOnly = null, int page = 1, int pageSize = 20)
+        {
+            var client = CreateClient();
+
+            var query = $"api/products?page={page}&pageSize={pageSize}";
+            if (!string.IsNullOrWhiteSpace(search))
+                query += $"&search={Uri.EscapeDataString(search)}";
+            if (lowStockOnly.HasValue)
+                query += $"&lowStockOnly={lowStockOnly.Value.ToString().ToLower()}";
+
+            var response = await client.GetAsync(query);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<PagedResult<ProductListItemVm>>>();
+            return result?.Data ?? new PagedResult<ProductListItemVm>();
+        }
+
+        public async Task<ProductListItemVm?> GetProductByIdAsync(int productId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/products/{productId}");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<ProductListItemVm>>();
+            return result?.Data;
+        }
+
+        public async Task CreateProductAsync(CreateProductVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync("api/products", new
+            {
+                name = model.Name,
+                unit = model.Unit,
+                initialStock = model.InitialStock,
+                minQty = model.MinQty
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task UpdateProductAsync(int productId, UpdateProductVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PutAsJsonAsync($"api/products/{productId}", new
+            {
+                name = model.Name,
+                unit = model.Unit,
+                minQty = model.MinQty
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task DeleteProductAsync(int productId)
+        {
+            var client = CreateClient();
+
+            var response = await client.DeleteAsync($"api/products/{productId}");
+            response.EnsureSuccessStatusCode();
+        }
+
+
+        // =========================
+        //PURCHASE ORDER
+        // =========================
+
+
+        public async Task<PagedResult<PurchaseOrderListItemVm>> GetPurchaseOrdersAsync(int? supplierId = null, int? statusId = null, int page = 1, int pageSize = 20)
+        {
+            var client = CreateClient();
+
+            var query = $"api/purchase-orders?page={page}&pageSize={pageSize}";
+            if (supplierId.HasValue)
+                query += $"&supplierId={supplierId.Value}";
+            if (statusId.HasValue)
+                query += $"&statusId={statusId.Value}";
+
+            var response = await client.GetAsync(query);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<PagedResult<PurchaseOrderListItemVm>>>();
+            return result?.Data ?? new PagedResult<PurchaseOrderListItemVm>();
+        }
+
+        public async Task<PurchaseOrderDetailVm?> GetPurchaseOrderByIdAsync(int purchaseOrderId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/purchase-orders/{purchaseOrderId}");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<PurchaseOrderDetailVm>>();
+            return result?.Data;
+        }
+
+        public async Task CreatePurchaseOrderAsync(CreatePurchaseOrderVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync("api/purchase-orders", new
+            {
+                supplierId = model.SupplierId,
+                note = model.Note,
+                items = model.Items.Select(x => new
+                {
+                    productId = x.ProductId,
+                    quantity = x.Quantity,
+                    unitPrice = x.UnitPrice
+                }).ToList()
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task ConfirmPurchaseOrderAsync(int purchaseOrderId)
+        {
+            var client = CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Patch, $"api/purchase-orders/{purchaseOrderId}/confirm");
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task CancelPurchaseOrderAsync(int purchaseOrderId)
+        {
+            var client = CreateClient();
+
+            var request = new HttpRequestMessage(HttpMethod.Patch, $"api/purchase-orders/{purchaseOrderId}/cancel");
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+        }
+
+
+
+        // =========================
+        //  Invoices
+        // =========================
+
+        public async Task<List<InvoiceListItemVm>> GetInvoicesAsync(DateTime? date = null)
+        {
+            var client = CreateClient();
+            var queryDate = (date ?? DateTime.Today).ToString("yyyy-MM-dd");
+
+            var response = await client.GetAsync($"api/invoices?date={queryDate}&page=1&pageSize=100");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<PagedResult<InvoiceListItemVm>>>();
+            return result?.Data?.Items ?? new List<InvoiceListItemVm>();
+        }
+
+        public async Task<InvoiceDetailVm?> GetInvoiceDetailAsync(int paymentId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/invoices/{paymentId}");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<InvoiceDetailVm>>();
+            return result?.Data;
         }
     }
 }

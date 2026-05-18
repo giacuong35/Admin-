@@ -1,0 +1,435 @@
+﻿@model Admin.ViewModels.Bookings.CreateAdminWalkInBookingVm
+@using Admin.ViewModels.Users
+
+@{
+    ViewData["Title"] = "Đặt sân mới tại quầy";
+    var customers = ViewBag.Customers as List<UserListItemVm> ?? new();
+}
+
+<div class="p-8 space-y-8 flex-1">
+    <div class="relative overflow-hidden rounded-xl hero-gradient p-10 text-white shadow-lg">
+        <div class="relative z-10 max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-manrope font-extrabold tracking-tight leading-none mb-4 uppercase">
+                Đặt sân mới tại quầy
+            </h2>
+            <p class="font-medium text-lg mb-6 opacity-90">
+                Chọn khách hàng hoặc khách vãng lai, sau đó chọn sân và 1 đến 3 khung giờ liên tiếp còn trống trong ngày.
+            </p>
+            <a asp-action="Bookings"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary rounded-full text-sm font-bold shadow-lg">
+                <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                <span>Quay lại danh sách booking</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm p-8">
+        <form asp-action="CreateAdminWalkInBooking" method="post" class="space-y-8">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-4"></div>
+
+            <input asp-for="FieldId" type="hidden" id="SelectedFieldId" />
+            <div id="selectedSlotInputs"></div>
+
+            <div class="rounded-3xl border border-zinc-100 p-6 space-y-6">
+                <h3 class="text-xl font-bold text-zinc-800">1. Thông tin khách hàng</h3>
+
+                <div class="flex flex-wrap gap-3">
+                    <button type="button" id="systemCustomerBtn"
+                            class="customer-mode-btn px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                        Khách có trong hệ thống
+                    </button>
+                    <button type="button" id="guestCustomerBtn"
+                            class="customer-mode-btn px-5 py-3 rounded-2xl bg-zinc-50 text-zinc-700 font-bold border border-zinc-200">
+                        Khách vãng lai
+                    </button>
+                </div>
+
+                <input asp-for="IsGuest" type="hidden" id="IsGuestInput" />
+
+                <div id="systemCustomerBox" class="space-y-2">
+                    <label asp-for="CustomerId" class="text-sm font-bold text-zinc-700">Khách hàng</label>
+                    <select asp-for="CustomerId" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm">
+                        <option value="">-- Chọn khách hàng --</option>
+                        @foreach (var c in customers)
+                        {
+                            <option value="@c.UserId">@c.FullName - @c.Phone</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CustomerId" class="text-xs text-red-600"></span>
+                </div>
+
+                <div id="guestCustomerBox" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label asp-for="GuestName" class="text-sm font-bold text-zinc-700">Tên khách vãng lai</label>
+                        <input asp-for="GuestName" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                        <span asp-validation-for="GuestName" class="text-xs text-red-600"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="GuestPhone" class="text-sm font-bold text-zinc-700">Số điện thoại</label>
+                        <input asp-for="GuestPhone" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                        <span asp-validation-for="GuestPhone" class="text-xs text-red-600"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-3xl border border-zinc-100 p-6 space-y-6">
+                <h3 class="text-xl font-bold text-zinc-800">2. Chọn ngày và thông tin thêm</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label asp-for="BookingDate" class="text-sm font-bold text-zinc-700">Ngày đặt</label>
+                        <input asp-for="BookingDate" type="date" id="bookingDateInput"
+                               class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="PromotionCode" class="text-sm font-bold text-zinc-700">Mã khuyến mãi</label>
+                        <input asp-for="PromotionCode" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Note" class="text-sm font-bold text-zinc-700">Ghi chú</label>
+                        <input asp-for="Note" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-3xl border border-zinc-100 p-6 space-y-6">
+                <h3 class="text-xl font-bold text-zinc-800">3. Chọn sân và khung giờ</h3>
+                <p class="text-sm text-zinc-500">
+                    Mỗi sân hiển thị các khung giờ trong ngày. Bạn có thể chọn từ 1 đến 3 khung giờ liên tiếp của cùng một sân.
+                </p>
+
+                <div id="selectedSummary"
+                     class="hidden rounded-2xl bg-emerald-50 border border-emerald-200 px-5 py-4 text-sm text-emerald-800 font-semibold">
+                </div>
+
+                <div id="fieldGrid" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div class="text-sm text-zinc-500">Chọn ngày để tải lịch sân...</div>
+                </div>
+            </div>
+
+            <div class="rounded-3xl border border-zinc-100 p-6 space-y-6">
+                <h3 class="text-xl font-bold text-zinc-800">4. Thanh toán</h3>
+
+                <div class="flex items-center gap-3">
+                    <input asp-for="IsFullPayment" type="checkbox" id="isFullPaymentChk" class="rounded border-zinc-300" />
+                    <label asp-for="IsFullPayment" class="text-sm font-medium text-zinc-700">
+                        Khách thanh toán đủ ngay tại quầy
+                    </label>
+                </div>
+
+                <div id="paymentBox" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label asp-for="PaymentMethodId" class="text-sm font-bold text-zinc-700">Phương thức thanh toán</label>
+                        <select asp-for="PaymentMethodId" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm">
+                            <option value="">-- Chọn phương thức --</option>
+                            <option value="1">Trực tiếp</option>
+                            <option value="2">MoMo</option>
+                            <option value="3">VNPay</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="TransactionCode" class="text-sm font-bold text-zinc-700">Mã giao dịch</label>
+                        <input asp-for="TransactionCode" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100">
+                <a asp-action="Bookings"
+                   class="px-6 py-3 rounded-2xl border border-zinc-200 text-sm font-bold text-zinc-600">
+                    Hủy
+                </a>
+                <button type="submit"
+                        class="px-6 py-3 rounded-2xl hero-gradient text-white text-sm font-bold shadow-lg">
+                    Tạo booking
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (() => {
+            const bookingDateInput = document.getElementById('bookingDateInput');
+            const fieldGrid = document.getElementById('fieldGrid');
+            const selectedSummary = document.getElementById('selectedSummary');
+            const selectedFieldIdInput = document.getElementById('SelectedFieldId');
+            const selectedSlotInputs = document.getElementById('selectedSlotInputs');
+
+            const systemCustomerBtn = document.getElementById('systemCustomerBtn');
+            const guestCustomerBtn = document.getElementById('guestCustomerBtn');
+            const systemCustomerBox = document.getElementById('systemCustomerBox');
+            const guestCustomerBox = document.getElementById('guestCustomerBox');
+            const isGuestInput = document.getElementById('IsGuestInput');
+
+            const isFullPaymentChk = document.getElementById('isFullPaymentChk');
+            const paymentBox = document.getElementById('paymentBox');
+
+            let scheduleData = [];
+            let selectedFieldId = null;
+            let selectedFieldName = null;
+            let selectedSlots = [];
+
+            function setGuestMode(isGuest) {
+                isGuestInput.value = isGuest ? 'true' : 'false';
+
+                if (isGuest) {
+                    guestCustomerBox.classList.remove('hidden');
+                    systemCustomerBox.classList.add('hidden');
+
+                    guestCustomerBtn.className = 'customer-mode-btn px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 font-bold border border-emerald-200';
+                    systemCustomerBtn.className = 'customer-mode-btn px-5 py-3 rounded-2xl bg-zinc-50 text-zinc-700 font-bold border border-zinc-200';
+                } else {
+                    systemCustomerBox.classList.remove('hidden');
+                    guestCustomerBox.classList.add('hidden');
+
+                    systemCustomerBtn.className = 'customer-mode-btn px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 font-bold border border-emerald-200';
+                    guestCustomerBtn.className = 'customer-mode-btn px-5 py-3 rounded-2xl bg-zinc-50 text-zinc-700 font-bold border border-zinc-200';
+                }
+            }
+
+            function togglePaymentBox() {
+                if (isFullPaymentChk.checked) {
+                    paymentBox.classList.remove('hidden');
+                } else {
+                    paymentBox.classList.add('hidden');
+                }
+            }
+
+            function isAvailable(slot) {
+                const status = (slot.status || '').toLowerCase();
+                if (status.includes('trống') || status.includes('available')) return true;
+                if (status.includes('đã đặt') || status.includes('booked')) return false;
+                if (status.includes('giữ') || status.includes('hold')) return false;
+                return false;
+            }
+
+            function normalizeSchedule(data) {
+                return (data || []).map(item => ({
+                    fieldId: item.fieldId,
+                    fieldName: item.fieldName,
+                    fieldType: item.fieldType,
+                    imageUrl: item.imageUrl,
+                    slotDate: item.slotDate,
+                    slots: (item.slots || []).map(slot => ({
+                        fieldSlotId: slot.fieldSlotId,
+                        slotId: slot.slotId,
+                        startTime: slot.startTime,
+                        endTime: slot.endTime,
+                        price: slot.price,
+                        isPeakHour: slot.isPeakHour,
+                        status: slot.status,
+                        statusId: slot.statusId,
+                        holdRemainingSeconds: slot.holdRemainingSeconds
+                    }))
+                }));
+            }
+
+            function sortSlots(slots) {
+                return [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime));
+            }
+
+            function areConsecutive(slots) {
+                const ordered = sortSlots(slots);
+                for (let i = 1; i < ordered.length; i++) {
+                    if (ordered[i - 1].endTime !== ordered[i].startTime) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function refreshHiddenInputs() {
+                selectedFieldIdInput.value = selectedFieldId || '';
+                selectedSlotInputs.innerHTML = selectedSlots
+                    .map(s => `<input type="hidden" name="SelectedSlotIds" value="${s.fieldSlotId}" />`)
+                    .join('');
+            }
+
+            function refreshSummary() {
+                if (!selectedSlots.length) {
+                    selectedSummary.classList.add('hidden');
+                    selectedSummary.innerHTML = '';
+                    return;
+                }
+
+                const ordered = sortSlots(selectedSlots);
+                const first = ordered[0];
+                const last = ordered[ordered.length - 1];
+
+                selectedSummary.classList.remove('hidden');
+                selectedSummary.innerHTML = `
+                    Đã chọn: <strong>${selectedFieldName}</strong> —
+                    <strong>${first.startTime} - ${last.endTime}</strong>
+                    (${ordered.length} khung giờ)
+                `;
+            }
+
+            function toggleSlot(fieldId, fieldName, slot) {
+                if (!isAvailable(slot)) return;
+
+                const exists = selectedSlots.some(s => s.fieldSlotId === slot.fieldSlotId);
+
+                if (selectedFieldId !== null && selectedFieldId !== fieldId) {
+                    selectedFieldId = fieldId;
+                    selectedFieldName = fieldName;
+                    selectedSlots = [slot];
+                    refreshHiddenInputs();
+                    refreshSummary();
+                    renderFieldGrid();
+                    return;
+                }
+
+                let next = exists
+                    ? selectedSlots.filter(s => s.fieldSlotId !== slot.fieldSlotId)
+                    : [...selectedSlots, slot];
+
+                if (next.length === 0) {
+                    selectedFieldId = null;
+                    selectedFieldName = null;
+                    selectedSlots = [];
+                    refreshHiddenInputs();
+                    refreshSummary();
+                    renderFieldGrid();
+                    return;
+                }
+
+                if (next.length > 3) {
+                    alert('Chỉ được chọn tối đa 3 khung giờ.');
+                    return;
+                }
+
+                if (!areConsecutive(next)) {
+                    alert('Các khung giờ phải liền kề nhau.');
+                    return;
+                }
+
+                selectedFieldId = fieldId;
+                selectedFieldName = fieldName;
+                selectedSlots = sortSlots(next);
+
+                refreshHiddenInputs();
+                refreshSummary();
+                renderFieldGrid();
+            }
+
+            function renderFieldGrid() {
+                if (!scheduleData.length) {
+                    fieldGrid.innerHTML = `<div class="text-sm text-zinc-500">Không có dữ liệu sân trong ngày này.</div>`;
+                    return;
+                }
+
+                fieldGrid.innerHTML = scheduleData.map(field => {
+                    const slotHtml = field.slots.map(slot => {
+                        const available = isAvailable(slot);
+                        const selected = selectedSlots.some(s => s.fieldSlotId === slot.fieldSlotId);
+
+                        return `
+                            <button type="button"
+                                    class="slot-chip rounded-2xl border px-4 py-3 text-left transition-all ${selected
+                                        ? 'border-emerald-500 bg-emerald-50 shadow-md'
+                                        : available
+                                            ? 'border-zinc-200 bg-white hover:border-emerald-300 hover:shadow-sm'
+                                            : 'border-zinc-200 bg-zinc-100 opacity-40 cursor-not-allowed'}"
+                                    data-field-id="${field.fieldId}"
+                                    data-field-name="${field.fieldName}"
+                                    data-slot='${JSON.stringify(slot).replace(/'/g, "&apos;")}'
+                                    ${available ? '' : 'disabled'}>
+                                <div class="text-sm font-extrabold text-zinc-800">${slot.startTime} - ${slot.endTime}</div>
+                                <div class="text-xs text-zinc-500 mt-1">${Number(slot.price || 0).toLocaleString('vi-VN')}đ</div>
+                                <div class="mt-2">
+                                    <span class="inline-flex items-center gap-2 text-[11px] font-bold px-2.5 py-1 rounded-full ${available ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-600'}">
+                                        <span class="w-2 h-2 rounded-full ${available ? 'bg-emerald-500' : 'bg-zinc-500'}"></span>
+                                        ${available ? 'Trống' : (slot.status || 'Không khả dụng')}
+                                    </span>
+                                </div>
+                            </button>
+                        `;
+                    }).join('');
+
+                    return `
+                        <div class="rounded-3xl border border-zinc-200 overflow-hidden bg-white shadow-sm">
+                            <div class="h-44 bg-zinc-100 overflow-hidden">
+                                ${field.imageUrl
+                                    ? `<img src="${field.imageUrl}" alt="${field.fieldName}" class="w-full h-full object-cover" />`
+                                    : `<div class="w-full h-full flex items-center justify-center text-zinc-400">
+                                            <span class="material-symbols-outlined text-[56px]">sports_soccer</span>
+                                       </div>`}
+                            </div>
+
+                            <div class="p-5 space-y-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <div class="text-2xl font-extrabold text-zinc-800">${field.fieldName}</div>
+                                        <div class="text-sm text-zinc-500 mt-1">${field.fieldType || 'Sân thể thao'}</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    ${slotHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.querySelectorAll('.slot-chip:not([disabled])').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const fieldId = parseInt(btn.dataset.fieldId);
+                        const fieldName = btn.dataset.fieldName;
+                        const slot = JSON.parse(btn.dataset.slot);
+
+                        toggleSlot(fieldId, fieldName, slot);
+                    });
+                });
+            }
+
+            async function loadSchedule() {
+                const dateValue = bookingDateInput.value;
+
+                if (!dateValue) {
+                    fieldGrid.innerHTML = `<div class="text-sm text-zinc-500">Vui lòng chọn ngày.</div>`;
+                    return;
+                }
+
+                selectedFieldId = null;
+                selectedFieldName = null;
+                selectedSlots = [];
+                refreshHiddenInputs();
+                refreshSummary();
+
+                fieldGrid.innerHTML = `<div class="text-sm text-zinc-500">Đang tải lịch sân...</div>`;
+
+                try {
+                    const res = await fetch(`/Admin/GetWalkInSchedule?date=${dateValue}`);
+                    const json = await res.json();
+                    scheduleData = normalizeSchedule(json.data ?? []);
+                    renderFieldGrid();
+                } catch {
+                    fieldGrid.innerHTML = `<div class="text-sm text-red-500">Không tải được lịch sân.</div>`;
+                }
+            }
+
+            systemCustomerBtn.addEventListener('click', () => setGuestMode(false));
+            guestCustomerBtn.addEventListener('click', () => setGuestMode(true));
+            bookingDateInput.addEventListener('change', loadSchedule);
+            isFullPaymentChk.addEventListener('change', togglePaymentBox);
+
+            setGuestMode(false);
+            togglePaymentBox();
+
+            if (bookingDateInput.value) {
+                loadSchedule();
+            }
+        })();
+    </script>
+}
