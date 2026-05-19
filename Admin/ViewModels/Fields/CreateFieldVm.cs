@@ -11,7 +11,12 @@ namespace Admin.ViewModels.Fields
         public string? Description { get; set; }
 
         [Required(ErrorMessage = "Giá cơ bản không được để trống")]
+        [Range(1000, double.MaxValue, ErrorMessage = "Giá cơ bản phải lớn hơn 0")]
         public decimal BasePrice { get; set; }
+
+        [Required(ErrorMessage = "Giá cao điểm không được để trống")]
+        [Range(1000, double.MaxValue, ErrorMessage = "Giá cao điểm phải lớn hơn 0")]
+        public decimal PeakPrice { get; set; }
 
         public IFormFile? ImageFile { get; set; }
 

@@ -1,4 +1,18 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+
+    var roleId = Context.Session.GetInt32("RoleId") ?? 0;
+    var fullName = Context.Session.GetString("FullName") ?? "Admin User";
+    var email = Context.Session.GetString("UserEmail") ?? "admin@sportplus.vn";
+
+    var isAdmin = roleId == 1;
+    var isStaff = roleId == 2;
+
+    var roleName = isAdmin ? "Quản trị viên" : "Nhân viên";
+    var avatarText = isAdmin ? "AD" : "ST";
+}
+
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -11,21 +25,21 @@
 
     <script>
         tailwind.config = {
-          theme: {
-            extend: {
-              colors: {
-                "primary": "#006418",
-                "primary-container": "#267e2e",
-                "surface": "#f1f5f9",
-                "on-surface": "#0f172a",
-                "error": "#ba1a1a"
-              },
-              fontFamily: {
-                "manrope": ["Manrope", "sans-serif"],
-                "inter": ["Inter", "sans-serif"]
-              }
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#006418",
+                        "primary-container": "#267e2e",
+                        "surface": "#f1f5f9",
+                        "on-surface": "#0f172a",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "manrope": ["Manrope", "sans-serif"],
+                        "inter": ["Inter", "sans-serif"]
+                    }
+                }
             }
-          }
         }
     </script>
 
@@ -45,7 +59,7 @@
         #userDropdownMenu {
             animation: fadeIn 0.15s ease-out;
         }
-        /* Đã sửa lỗi @@keyframes cho bạn ở đây */
+
         @@keyframes fadeIn {
             from {
                 opacity: 0;
@@ -59,74 +73,76 @@
         }
     </style>
 </head>
+
 <body class="bg-surface font-inter text-on-surface min-h-screen flex flex-col">
 
     <aside class="fixed left-0 top-0 h-screen w-64 bg-white z-40 flex flex-col overflow-hidden">
         <div class="px-6 py-8">
             <h1 class="text-2xl font-black text-primary uppercase tracking-tighter font-manrope">Sport Plus</h1>
-            <p class="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest opacity-70">Admin Portal</p>
+            <p class="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest opacity-70">
+                @(isAdmin ? "Admin Portal" : "Staff Portal")
+            </p>
         </div>
 
         <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
-            @{
-                var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
-            }
 
-            @* 1. Tổng quan *@
-            <a href="@Url.Action("Index", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Index" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+            <a href="@Url.Action("Index", "Admin")"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Index" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span class="font-medium">Tổng quan</span>
             </a>
 
-            @* 2. Khách hàng *@
-            <a href="@Url.Action("Customers", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Customers" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+            <a href="@Url.Action("Customers", "Admin")"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Customers" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
                 <span class="material-symbols-outlined">group</span>
                 <span class="font-medium">Khách hàng</span>
             </a>
 
-            @* 3. Dịch vụ *@
-            <a href="@Url.Action("Services", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Services" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
-                <span class="material-symbols-outlined">sports_soccer</span>
-                <span class="font-medium">Dịch vụ</span>
-            </a>
+            @if (isAdmin)
+            {
+                <a href="@Url.Action("Services", "Admin")"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Services" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                    <span class="material-symbols-outlined">sports_soccer</span>
+                    <span class="font-medium">Dịch vụ</span>
+                </a>
 
-            @* 4. Báo cáo *@
-            <a href="@Url.Action("Reports", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Reports" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
-                <span class="material-symbols-outlined">analytics</span>
-                <span class="font-medium">Báo cáo</span>
-            </a>
+                <a href="@Url.Action("Reports", "Admin")"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Reports" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="font-medium">Báo cáo</span>
+                </a>
 
-            @* 5. Kho hàng *@
-            <a href="@Url.Action("Products", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Products" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
-                <span class="material-symbols-outlined">inventory_2</span>
-                <span class="font-medium">Kho hàng</span>
-            </a>
+                <a href="@Url.Action("Products", "Admin")"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Products" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                    <span class="font-medium">Kho hàng</span>
+                </a>
 
-            @* 6. Nhà cung cấp *@
-            <a href="@Url.Action("Suppliers", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Suppliers" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
-                <span class="material-symbols-outlined">handshake</span>
-                <span class="font-medium">Nhà cung cấp</span>
-            </a>
+                <a href="@Url.Action("Suppliers", "Admin")"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Suppliers" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                    <span class="material-symbols-outlined">handshake</span>
+                    <span class="font-medium">Nhà cung cấp</span>
+                </a>
 
-            @* 7. Nhân sự *@
-            <a href="@Url.Action("Staff", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Staff" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
-                <span class="material-symbols-outlined">badge</span>
-                <span class="font-medium">Nhân sự</span>
-            </a>
+                <a href="@Url.Action("Staff", "Admin")"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Staff" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                    <span class="material-symbols-outlined">badge</span>
+                    <span class="font-medium">Nhân sự</span>
+                </a>
 
-            @* 8. Quản lý sân *@
-            <a href="@Url.Action("Fields", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Fields" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
-                <span class="material-symbols-outlined">stadium</span>
-                <span class="font-medium">Quản lý sân</span>
-            </a>
+                <a href="@Url.Action("Fields", "Admin")"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Fields" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                    <span class="material-symbols-outlined">stadium</span>
+                    <span class="font-medium">Quản lý sân</span>
+                </a>
+            }
 
-            @* 9. Đặt sân *@
-            <a href="@Url.Action("Bookings", "Admin")" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Bookings" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+            <a href="@Url.Action("Bookings", "Admin")"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Bookings" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
                 <span class="material-symbols-outlined">calendar_month</span>
                 <span class="font-medium">Quản lí đặt sân</span>
             </a>
 
-            @* 10. Hóa đơn *@
             <a href="@Url.Action("Invoices", "Admin")"
                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @((currentAction == "Invoices" || currentAction == "InvoiceDetail") ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
                 <span class="material-symbols-outlined">receipt_long</span>
@@ -134,11 +150,13 @@
             </a>
         </nav>
 
-        <a href="@Url.Action("CreateAdminWalkInBooking", "Admin")"
-           class="inline-flex items-center justify-center gap-2 rounded-2xl hero-gradient text-white font-bold px-5 py-4 w-full shadow-lg">
-            <span class="material-symbols-outlined text-[22px]">calendar_add_on</span>
-            <span>Đặt sân mới</span>
-        </a>
+        <div class="p-4">
+            <a href="@Url.Action("CreateAdminWalkInBooking", "Admin")"
+               class="inline-flex items-center justify-center gap-2 rounded-2xl hero-gradient text-white font-bold px-5 py-4 w-full shadow-lg">
+                <span class="material-symbols-outlined text-[22px]">calendar_add_on</span>
+                <span>Đặt sân mới</span>
+            </a>
+        </div>
     </aside>
 
     <main class="ml-64 min-h-screen flex flex-col">
@@ -157,25 +175,30 @@
                 <div class="relative inline-block text-left">
                     <button type="button" id="userMenuTrigger" class="flex items-center gap-3 pl-6 border-l border-zinc-200 hover:bg-zinc-50 p-1.5 rounded-2xl transition-all active:scale-95">
                         <div class="text-right hidden sm:block">
-                            <p class="text-sm font-bold text-on-surface leading-none">Admin User</p>
-                            <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mt-1">Quản trị viên</p>
+                            <p class="text-sm font-bold text-on-surface leading-none">@fullName</p>
+                            <p class="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mt-1">@roleName</p>
                         </div>
+
                         <div class="w-10 h-10 rounded-full hero-gradient p-0.5 shadow-md flex items-center justify-center text-white font-black text-xs">
-                            AD
+                            @avatarText
                         </div>
                     </button>
 
                     <div id="userDropdownMenu" class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-zinc-100 py-2 z-50">
                         <div class="px-4 py-3 border-b border-zinc-50 mb-1">
                             <p class="text-xs text-zinc-400 font-bold uppercase tracking-widest">Tài khoản</p>
-                            <p class="text-sm font-medium text-zinc-800">admin@sportplus.vn</p>
+                            <p class="text-sm font-medium text-zinc-800">@email</p>
                         </div>
+
                         <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-[20px]">account_circle</span>
                             Thông tin cá nhân
                         </a>
+
                         <hr class="my-1 border-zinc-50">
+
                         <form asp-action="Logout" asp-controller="Account" method="post">
+                            @Html.AntiForgeryToken()
                             <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-bold">
                                 <span class="material-symbols-outlined text-[20px]">logout</span>
                                 Đăng xuất
@@ -200,8 +223,8 @@
     </main>
 
     <script src="~/js/admin-layout.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
 
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
 </html>

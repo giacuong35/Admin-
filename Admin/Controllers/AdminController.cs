@@ -286,9 +286,17 @@ namespace Admin.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            await _apiClient.CreateFieldAsync(model);
-            TempData["SuccessMessage"] = "Đã thêm sân mới!";
-            return RedirectToAction(nameof(Fields));
+            try
+            {
+                await _apiClient.CreateFieldAsync(model);
+                TempData["SuccessMessage"] = "Đã thêm sân mới!";
+                return RedirectToAction(nameof(Fields));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
         }
 
         public async Task<IActionResult> EditField(int id)

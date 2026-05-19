@@ -1,4 +1,5 @@
-﻿using Admin.ViewModels.Auth;
+﻿using Admin.Models;
+using Admin.ViewModels.Auth;
 using Admin.ViewModels.Bookings;
 using Admin.ViewModels.Common;
 using Admin.ViewModels.Dashboard;
@@ -10,6 +11,7 @@ using Admin.ViewModels.Services;
 using Admin.ViewModels.Suppliers;
 using Admin.ViewModels.Users;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -200,16 +202,51 @@ namespace Admin.Services.Api
         {
             var client = CreateClient();
 
-            var response = await client.PostAsJsonAsync("api/fields", new
+            var createRequest = new
             {
                 name = model.Name,
                 description = model.Description,
                 basePrice = model.BasePrice,
-                typeId = model.TypeId,
-                statusId = model.StatusId
-            });
+                peakPrice = model.PeakPrice,
+                typeId = model.TypeId
+            };
 
-            response.EnsureSuccessStatusCode();
+            var response = await client.PostAsJsonAsync("api/fields", createRequest);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API tạo sân lỗi: {content}");
+            }
+
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var createdResult = await response.Content.ReadFromJsonAsync<ApiResult<FieldVm>>();
+
+                if (createdResult?.Data != null)
+                {
+                    using var formData = new MultipartFormDataContent();
+                    using var stream = model.ImageFile.OpenReadStream();
+                    using var streamContent = new StreamContent(stream);
+
+                    streamContent.Headers.ContentType =
+                        new MediaTypeHeaderValue(model.ImageFile.ContentType);
+
+                    formData.Add(streamContent, "file", model.ImageFile.FileName);
+
+                    var uploadResponse = await client.PostAsync(
+                        $"api/fields/{createdResult.Data.FieldId}/image",
+                        formData
+                    );
+
+                    var uploadContent = await uploadResponse.Content.ReadAsStringAsync();
+
+                    if (!uploadResponse.IsSuccessStatusCode)
+                    {
+                        throw new Exception($"Tạo sân thành công nhưng upload ảnh lỗi: {uploadContent}");
+                    }
+                }
+            }
         }
 
         public async Task UpdateFieldAsync(int fieldId, EditFieldVm model)
