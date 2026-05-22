@@ -65,12 +65,34 @@
                                 <td class="px-6 py-5 font-bold text-emerald-700">
                                     @item.Amount.ToString("N0") VNĐ
                                 </td>
-                                <td class="px-6 py-5 text-right">
-                                    <a asp-action="InvoiceDetail" asp-route-id="@item.PaymentId"
-                                       class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border border-zinc-200 text-sm font-bold text-zinc-700 hover:border-emerald-300">
-                                        <span class="material-symbols-outlined text-[18px]">receipt_long</span>
-                                        Chi tiết
-                                    </a>
+                                <td class="px-6 py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a asp-action="InvoiceDetail"
+                                           asp-controller="Admin"
+                                           asp-route-id="@item.PaymentId"
+                                           class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition">
+                                            <span class="material-symbols-outlined text-[18px]">description</span>
+                                            Chi tiết
+                                        </a>
+
+                                        <a asp-action="InvoicePreview"
+                                           asp-controller="Admin"
+                                           asp-route-id="@item.PaymentId"
+                                           target="_blank"
+                                           class="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                            Xem trước
+                                        </a>
+
+                                        <a asp-action="PrintInvoicePdf"
+                                           asp-controller="Admin"
+                                           asp-route-id="@item.PaymentId"
+                                           target="_blank"
+                                           class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition">
+                                            <span class="material-symbols-outlined text-[18px]">print</span>
+                                            In PDF
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         }

@@ -9,6 +9,7 @@ using Admin.ViewModels.Suppliers;
 using Admin.ViewModels.Products;
 using Admin.ViewModels.PurchaseOrders;
 using Admin.ViewModels.Invoices;
+using Admin.ViewModels.Incidents;
 
 
 namespace Admin.Services.Api
@@ -59,6 +60,7 @@ namespace Admin.Services.Api
         Task CreateAdminWalkInBookingAsync(CreateAdminWalkInBookingVm model);
         Task<string> GetFieldScheduleRawAsync(DateTime date, int? fieldId = null, int? typeId = null);
         Task CompleteBookingAsync(int bookingId);
+        Task AdminRescheduleBookingAsync(int bookingId, AdminRescheduleBookingVm model);
 
 
         // Dashboard
@@ -66,6 +68,7 @@ namespace Admin.Services.Api
         Task<List<RevenueByMonthVm>> GetRevenueByMonthAsync(int? year = null);
         Task<List<FieldOccupancyVm>> GetFieldOccupancyAsync(int? year = null, int? month = null);
         Task<List<RevenueByServiceVm>> GetRevenueByServiceAsync();
+        Task<MonthlyReportVm?> GetMonthlyReportAsync(int year, int? month = null);
 
 
         // Suppliers
@@ -95,5 +98,14 @@ namespace Admin.Services.Api
         //Invoices
         Task<List<InvoiceListItemVm>> GetInvoicesAsync(DateTime? date = null);
         Task<InvoiceDetailVm?> GetInvoiceDetailAsync(int paymentId);
+        Task<byte[]?> DownloadInvoicePdfAsync(int paymentId);
+        Task<string?> GetInvoicePdfUrlAsync(int paymentId);
+
+
+        // Incidents
+        Task<List<IncidentListItemVm>> GetIncidentsAsync(int? fieldId = null, int? statusId = null, int page = 1, int pageSize = 50);
+        Task<IncidentDetailVm?> GetIncidentByIdAsync(int incidentId);
+        Task CreateIncidentAsync(CreateIncidentVm model);
+        Task HandleIncidentAsync(int incidentId, HandleIncidentVm model);
     }
 }

@@ -44,37 +44,54 @@
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-zinc-100">
-                <h3 class="font-manrope font-bold text-xl text-primary">Doanh thu theo tháng</h3>
+                <h3 class="font-manrope font-bold text-xl text-primary">
+                    Tổng quan tháng @(Model.MonthlyReport.Month.ToString("D2"))/@Model.MonthlyReport.Year
+                </h3>
             </div>
 
-            @if (Model.RevenueByMonth.Any())
-            {
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-zinc-50 border-b border-zinc-100">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Tháng</th>
-                                <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Booking</th>
-                                <th class="px-6 py-4 text-left text-[11px] font-black uppercase tracking-widest text-zinc-400">Doanh thu</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-zinc-100">
-                            @foreach (var item in Model.RevenueByMonth.OrderBy(x => x.Month))
-                            {
-                                <tr>
-                                    <td class="px-6 py-4 font-bold text-zinc-700">Tháng @item.Month</td>
-                                    <td class="px-6 py-4 text-zinc-600">@item.TotalBookings</td>
-                                    <td class="px-6 py-4 font-bold text-primary">@item.TotalRevenue.ToString("N0") VNĐ</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+                    <div class="text-xs font-black uppercase tracking-widest text-zinc-400">Tổng doanh thu</div>
+                    <div class="mt-3 text-2xl font-extrabold text-primary">
+                        @Model.MonthlyReport.TotalRevenue.ToString("N0") VNĐ
+                    </div>
                 </div>
-            }
-            else
-            {
-                <div class="px-6 py-12 text-center text-zinc-500">Không có dữ liệu.</div>
-            }
+
+                <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+                    <div class="text-xs font-black uppercase tracking-widest text-zinc-400">Tiền mặt</div>
+                    <div class="mt-3 text-2xl font-extrabold text-zinc-800">
+                        @Model.MonthlyReport.CashRevenue.ToString("N0") VNĐ
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+                    <div class="text-xs font-black uppercase tracking-widest text-zinc-400">VNPay</div>
+                    <div class="mt-3 text-2xl font-extrabold text-zinc-800">
+                        @Model.MonthlyReport.VnPayRevenue.ToString("N0") VNĐ
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+                    <div class="text-xs font-black uppercase tracking-widest text-zinc-400">Tổng đặt sân</div>
+                    <div class="mt-3 text-2xl font-extrabold text-zinc-800">
+                        @Model.MonthlyReport.TotalBookings
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+                    <div class="text-xs font-black uppercase tracking-widest text-zinc-400">Đã hoàn thành</div>
+                    <div class="mt-3 text-2xl font-extrabold text-emerald-600">
+                        @Model.MonthlyReport.CompletedBookings
+                    </div>
+                </div>
+
+                <div class="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+                    <div class="text-xs font-black uppercase tracking-widest text-zinc-400">Đã hủy</div>
+                    <div class="mt-3 text-2xl font-extrabold text-rose-600">
+                        @Model.MonthlyReport.CancelledBookings
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">

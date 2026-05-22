@@ -1,4 +1,4 @@
-﻿using Admin.Models;
+﻿
 using Admin.ViewModels.Auth;
 using Admin.ViewModels.Bookings;
 using Admin.ViewModels.Common;
@@ -10,6 +10,7 @@ using Admin.ViewModels.PurchaseOrders;
 using Admin.ViewModels.Services;
 using Admin.ViewModels.Suppliers;
 using Admin.ViewModels.Users;
+using Admin.ViewModels.Incidents;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -490,6 +491,24 @@ namespace Admin.Services.Api
 
             return await response.Content.ReadAsStringAsync();
         }
+
+        public async Task AdminRescheduleBookingAsync(int bookingId, AdminRescheduleBookingVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync($"api/bookings/{bookingId}/admin-reschedule", new
+            {
+                bookingDetailId = model.BookingDetailId,
+                newFieldSlotId = model.NewFieldSlotId
+            });
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(content);
+            }
+        }
         // =========================
         // DASHBOARD
         // =========================
@@ -552,6 +571,20 @@ namespace Admin.Services.Api
             return result?.Data ?? new List<RevenueByServiceVm>();
         }
 
+        public async Task<MonthlyReportVm?> GetMonthlyReportAsync(int year, int? month = null)
+        {
+            var client = CreateClient();
+
+            var url = $"api/dashboard/monthly-report?year={year}";
+            if (month.HasValue)
+                url += $"&month={month.Value}";
+
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<MonthlyReportVm>>();
+            return result?.Data;
+        }
 
 
 
@@ -793,6 +826,84 @@ namespace Admin.Services.Api
 
             var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<InvoiceDetailVm>>();
             return result?.Data;
+        }
+
+        public async Task<byte[]?> DownloadInvoicePdfAsync(int paymentId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/invoices/{paymentId}/pdf");
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
+        public Task<string?> GetInvoicePdfUrlAsync(int paymentId)
+        {
+            var client = CreateClient();
+            return Task.FromResult<string?>($"{client.BaseAddress}api/invoices/{paymentId}/pdf");
+        }
+
+
+
+        // =========================
+        // INCIDENTS
+        // =========================
+        public async Task<List<IncidentListItemVm>> GetIncidentsAsync(int? fieldId = null, int? statusId = null, int page = 1, int pageSize = 50)
+        {
+            var client = CreateClient();
+
+            var query = $"api/incidents?page={page}&pageSize={pageSize}";
+
+            if (fieldId.HasValue)
+                query += $"&fieldId={fieldId.Value}";
+
+            if (statusId.HasValue)
+                query += $"&statusId={statusId.Value}";
+
+            var response = await client.GetAsync(query);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<PagedResult<IncidentListItemVm>>>();
+            return result?.Data?.Items ?? new List<IncidentListItemVm>();
+        }
+
+        public async Task<IncidentDetailVm?> GetIncidentByIdAsync(int incidentId)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/incidents/{incidentId}");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<IncidentDetailVm>>();
+            return result?.Data;
+        }
+
+        public async Task CreateIncidentAsync(CreateIncidentVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsJsonAsync("api/incidents", new
+            {
+                fieldId = model.FieldId,
+                title = model.Title,
+                description = model.Description
+            });
+
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task HandleIncidentAsync(int incidentId, HandleIncidentVm model)
+        {
+            var client = CreateClient();
+
+            var response = await client.PutAsJsonAsync($"api/incidents/{incidentId}/handle", new
+            {
+                statusId = model.StatusId,
+                handleNote = model.HandleNote
+            });
+
+            response.EnsureSuccessStatusCode();
         }
     }
 }

@@ -1,0 +1,263 @@
+﻿@model Admin.ViewModels.Bookings.AdminRescheduleBookingVm
+
+@{
+    ViewData["Title"] = "Đổi lịch booking";
+    var booking = ViewBag.Booking as Admin.ViewModels.Bookings.BookingDetailVm;
+    var target = ViewBag.TargetDetail as Admin.ViewModels.Bookings.BookingDetailItemVm;
+}
+
+<section class="hero-gradient rounded-[32px] px-10 py-10 text-white shadow-soft">
+    <h1 class="font-manrope text-5xl font-black tracking-tight">ĐỔI LỊCH ĐẶT SÂN</h1>
+    <p class="mt-4 max-w-3xl text-lg text-white/90">
+        Admin/Staff hỗ trợ khách hàng đổi khung giờ đã đặt sang một slot mới phù hợp.
+    </p>
+    <div class="mt-8">
+        <a asp-action="BookingDetail"
+           asp-route-id="@Model.BookingId"
+           class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-primary shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-50">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Quay lại chi tiết booking
+        </a>
+    </div>
+</section>
+
+<div class="mt-8 grid gap-8 xl:grid-cols-[1.1fr_1.4fr]">
+    <section class="rounded-[30px] border border-zinc-100 bg-white p-8 shadow-soft">
+        <h2 class="font-manrope text-2xl font-black text-zinc-800">Thông tin slot hiện tại</h2>
+
+        @if (target != null)
+        {
+            <div class="mt-6 space-y-3 rounded-3xl border border-zinc-100 bg-zinc-50 p-6">
+                <div class="text-sm text-zinc-500">Mã booking</div>
+                <div class="text-xl font-black text-primary">BK-@Model.BookingId.ToString("D5")</div>
+
+                <div class="pt-2 text-sm text-zinc-500">Sân hiện tại</div>
+                <div class="text-lg font-bold text-zinc-800">@target.FieldName (@target.FieldType)</div>
+
+                <div class="pt-2 text-sm text-zinc-500">Khung giờ hiện tại</div>
+                <div class="text-lg font-bold text-zinc-800">
+                    @target.SlotDate.ToString("dd/MM/yyyy") -
+                    @target.StartTime đến
+                    @target.EndTime
+                </div>
+
+                <div class="pt-2 text-sm text-zinc-500">Giá</div>
+                <div class="text-lg font-extrabold text-primary">@target.Price.ToString("N0") VNĐ</div>
+            </div>
+        }
+
+        <form asp-action="AdminRescheduleBooking" method="post" class="mt-8 space-y-5">
+            @Html.AntiForgeryToken()
+
+            <input asp-for="BookingId" type="hidden" />
+            <input asp-for="BookingDetailId" type="hidden" />
+            <input asp-for="NewFieldSlotId" type="hidden" id="newFieldSlotId" />
+
+            <div asp-validation-summary="ModelOnly" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600"></div>
+
+            <div>
+                <label asp-for="SelectedDate" class="mb-2 block text-sm font-bold text-zinc-700">Chọn ngày mới</label>
+                <input asp-for="SelectedDate"
+                       id="selectedDate"
+                       type="date"
+                       class="h-14 w-full rounded-2xl border border-zinc-200 px-4 text-sm font-medium outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+                <span asp-validation-for="SelectedDate" class="mt-1 block text-sm text-rose-500"></span>
+            </div>
+
+            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                Chọn một khung giờ trống ở khu vực bên phải, sau đó bấm xác nhận đổi lịch.
+            </div>
+
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit"
+                        class="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-dark">
+                    <span class="material-symbols-outlined">event_available</span>
+                    Xác nhận đổi lịch
+                </button>
+
+                <a asp-action="BookingDetail"
+                   asp-route-id="@Model.BookingId"
+                   class="inline-flex items-center gap-2 rounded-2xl border border-zinc-200 bg-white px-6 py-3 text-sm font-bold text-zinc-700 transition hover:bg-zinc-50">
+                    Hủy
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="rounded-[30px] border border-zinc-100 bg-white p-8 shadow-soft">
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <h2 class="font-manrope text-2xl font-black text-zinc-800">Chọn slot mới</h2>
+                <p class="mt-2 text-sm text-zinc-500">
+                    Chỉ hiển thị các khung giờ trống để admin/staff hỗ trợ đổi lịch cho khách.
+                </p>
+            </div>
+
+            <div id="selectedSlotBadge"
+                 class="hidden rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700"></div>
+        </div>
+
+        <div id="scheduleLoading"
+             class="mt-6 hidden rounded-2xl border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
+            Đang tải lịch sân...
+        </div>
+
+        <div id="scheduleEmpty"
+             class="mt-6 hidden rounded-2xl border border-zinc-100 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-500">
+            Không có slot trống phù hợp trong ngày đã chọn.
+        </div>
+
+        <div id="scheduleGrid" class="mt-6 grid gap-6"></div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (() => {
+            const selectedDateInput = document.getElementById('selectedDate');
+            const newFieldSlotIdInput = document.getElementById('newFieldSlotId');
+            const scheduleGrid = document.getElementById('scheduleGrid');
+            const scheduleLoading = document.getElementById('scheduleLoading');
+            const scheduleEmpty = document.getElementById('scheduleEmpty');
+            const selectedSlotBadge = document.getElementById('selectedSlotBadge');
+
+            const targetFieldId = @((target?.FieldId ?? 0));
+            let selectedSlot = null;
+
+            function normalizeTime(time) {
+                if (!time) return '';
+                return String(time).substring(0, 5);
+            }
+
+            function showLoading(isLoading) {
+                scheduleLoading.classList.toggle('hidden', !isLoading);
+            }
+
+            function showEmpty(show) {
+                scheduleEmpty.classList.toggle('hidden', !show);
+            }
+
+            function updateSelectedBadge() {
+                if (!selectedSlot) {
+                    selectedSlotBadge.classList.add('hidden');
+                    selectedSlotBadge.textContent = '';
+                    return;
+                }
+
+                selectedSlotBadge.classList.remove('hidden');
+                selectedSlotBadge.textContent =
+                    selectedSlot.fieldName + ' • ' +
+                    normalizeTime(selectedSlot.startTime) + ' - ' +
+                    normalizeTime(selectedSlot.endTime);
+            }
+
+            function renderSchedule(data) {
+                scheduleGrid.innerHTML = '';
+                selectedSlot = null;
+                newFieldSlotIdInput.value = '';
+                updateSelectedBadge();
+
+                if (!data || !data.length) {
+                    showEmpty(true);
+                    return;
+                }
+
+                const availableFields = data.filter(field =>
+                    field.fieldId === targetFieldId &&
+                    Array.isArray(field.slots) &&
+                    field.slots.some(slot => slot.statusId === 1 || (slot.status || '').toLowerCase() === 'trống')
+                );
+
+                if (!availableFields.length) {
+                    showEmpty(true);
+                    return;
+                }
+
+                showEmpty(false);
+
+                availableFields.forEach(field => {
+                    const availableSlots = field.slots.filter(slot =>
+                        slot.statusId === 1 || (slot.status || '').toLowerCase() === 'trống'
+                    );
+
+                    const card = document.createElement('div');
+                    card.className = 'rounded-3xl border border-zinc-100 bg-zinc-50 p-6';
+
+                    const title = document.createElement('div');
+                    title.className = 'mb-4';
+                    title.innerHTML =
+                        '<div class="text-xl font-black text-zinc-800">' + field.fieldName + '</div>' +
+                        '<div class="mt-1 text-sm text-zinc-500">' + (field.fieldType || 'Sân thể thao') + '</div>';
+                    card.appendChild(title);
+
+                    const slotsWrap = document.createElement('div');
+                    slotsWrap.className = 'grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3';
+
+                    availableSlots.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'slot-btn rounded-2xl border border-zinc-200 bg-white px-4 py-4 text-left transition hover:border-primary hover:bg-emerald-50';
+                        btn.innerHTML =
+                            '<div class="text-base font-extrabold text-zinc-800">' + normalizeTime(slot.startTime) + ' - ' + normalizeTime(slot.endTime) + '</div>' +
+                            '<div class="mt-2 text-sm text-zinc-500">' + Number(slot.price || 0).toLocaleString('vi-VN') + ' VNĐ</div>' +
+                            '<div class="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">' +
+                            '<span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>Trống</div>';
+
+                        btn.addEventListener('click', () => {
+                            document.querySelectorAll('.slot-btn').forEach(x => {
+                                x.classList.remove('border-primary', 'bg-emerald-50', 'ring-2', 'ring-emerald-200');
+                            });
+
+                            btn.classList.add('border-primary', 'bg-emerald-50', 'ring-2', 'ring-emerald-200');
+
+                            selectedSlot = {
+                                fieldSlotId: slot.fieldSlotId,
+                                fieldName: field.fieldName,
+                                startTime: slot.startTime,
+                                endTime: slot.endTime
+                            };
+
+                            newFieldSlotIdInput.value = slot.fieldSlotId;
+                            updateSelectedBadge();
+                        });
+
+                        slotsWrap.appendChild(btn);
+                    });
+
+                    card.appendChild(slotsWrap);
+                    scheduleGrid.appendChild(card);
+                });
+            }
+
+            async function loadSchedule() {
+                const selectedDate = selectedDateInput.value;
+                if (!selectedDate) return;
+
+                showLoading(true);
+                showEmpty(false);
+                scheduleGrid.innerHTML = '';
+
+                try {
+                    const res = await fetch('/Admin/GetWalkInSchedule?date=' + selectedDate + '&fieldId=' + targetFieldId);
+                    const json = await res.json();
+                    renderSchedule(json.data || []);
+                } catch {
+                    scheduleGrid.innerHTML =
+                        '<div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-600">' +
+                        'Không tải được lịch sân. Vui lòng thử lại.' +
+                        '</div>';
+                } finally {
+                    showLoading(false);
+                }
+            }
+
+            selectedDateInput.addEventListener('change', loadSchedule);
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadSchedule();
+            });
+        })();
+    </script>
+}

@@ -1,9 +1,14 @@
 ﻿@model Admin.ViewModels.Bookings.CreateAdminWalkInBookingVm
 @using Admin.ViewModels.Users
+@inject IConfiguration Configuration
 
 @{
     ViewData["Title"] = "Đặt sân mới tại quầy";
     var customers = ViewBag.Customers as List<UserListItemVm> ?? new();
+}
+
+@{
+    var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "";
 }
 
 <div class="p-8 space-y-8 flex-1">
@@ -274,6 +279,18 @@
                 `;
             }
 
+
+            function buildImageUrl(imageUrl) {
+                if (!imageUrl) return '';
+
+                if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+                    return imageUrl;
+                }
+
+                const apiBaseUrl = '@apiBaseUrl';
+                return apiBaseUrl.replace(/\/$/, '') + '/' + imageUrl.replace(/^\//, '');
+                }
+
             function toggleSlot(fieldId, fieldName, slot) {
                 if (!isAvailable(slot)) return;
 
@@ -360,10 +377,13 @@
                         <div class="rounded-3xl border border-zinc-200 overflow-hidden bg-white shadow-sm">
                             <div class="h-44 bg-zinc-100 overflow-hidden">
                                 ${field.imageUrl
-                                    ? `<img src="${field.imageUrl}" alt="${field.fieldName}" class="w-full h-full object-cover" />`
+                                    ? `<img src="${buildImageUrl(field.imageUrl)}"
+                                            alt="${field.fieldName}"
+                                            class="w-full h-full object-cover" />`
                                     : `<div class="w-full h-full flex items-center justify-center text-zinc-400">
                                             <span class="material-symbols-outlined text-[56px]">sports_soccer</span>
-                                       </div>`}
+                                       </div>`
+                                }
                             </div>
 
                             <div class="p-5 space-y-4">

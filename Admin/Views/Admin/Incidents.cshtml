@@ -1,0 +1,66 @@
+﻿@model List<Admin.ViewModels.Incidents.IncidentListItemVm>
+
+@{
+    ViewData["Title"] = "Sự cố phát sinh";
+    var fields = ViewBag.Fields as List<Admin.ViewModels.Fields.FieldListItemVm>;
+}
+
+<div class="p-8 space-y-6">
+    <div class="rounded-3xl hero-gradient text-white p-8">
+        <h1 class="text-4xl font-black">SỰ CỐ PHÁT SINH</h1>
+        <p class="mt-3 text-white/90">Theo dõi và xử lý các sự cố trong quá trình vận hành sân.</p>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-zinc-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-extrabold text-zinc-800">Danh sách sự cố</h2>
+            <a asp-action="CreateIncident" asp-controller="Admin"
+               class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+                <span class="material-symbols-outlined">add</span>
+                Báo cáo sự cố
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-zinc-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left font-bold text-zinc-600">Mã</th>
+                        <th class="px-4 py-3 text-left font-bold text-zinc-600">Sân</th>
+                        <th class="px-4 py-3 text-left font-bold text-zinc-600">Tiêu đề</th>
+                        <th class="px-4 py-3 text-left font-bold text-zinc-600">Trạng thái</th>
+                        <th class="px-4 py-3 text-left font-bold text-zinc-600">Ngày tạo</th>
+                        <th class="px-4 py-3 text-right font-bold text-zinc-600">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr class="border-t border-zinc-200">
+                                <td class="px-4 py-3 font-semibold">SC-@item.IncidentId.ToString("D5")</td>
+                                <td class="px-4 py-3">@item.FieldName</td>
+                                <td class="px-4 py-3">@item.Title</td>
+                                <td class="px-4 py-3">@item.Status</td>
+                                <td class="px-4 py-3">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="px-4 py-3 text-right">
+                                    <a asp-action="IncidentDetail" asp-route-id="@item.IncidentId"
+                                       class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 px-4 py-2 font-semibold text-zinc-700 hover:bg-zinc-50">
+                                        Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr class="border-t border-zinc-200">
+                            <td colspan="6" class="px-4 py-8 text-center text-zinc-500">Chưa có sự cố nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

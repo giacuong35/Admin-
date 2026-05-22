@@ -1,6 +1,21 @@
 ﻿@model IEnumerable<Admin.ViewModels.Fields.FieldListItemVm>
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Quản lý sân";
+}
+
+@{
+    var apiBaseUrl = Configuration["ApiSettings:BaseUrl"] ?? "";
+    string BuildImageUrl(string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return "/images/no-image.png";
+
+        if (imageUrl.StartsWith("http://") || imageUrl.StartsWith("https://"))
+            return imageUrl;
+
+        return $"{apiBaseUrl.TrimEnd('/')}/{imageUrl.TrimStart('/')}";
+    }
 }
 
 <div class="p-8 space-y-8 flex-1">
@@ -48,7 +63,9 @@
                                         <div class="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 flex items-center justify-center">
                                             @if (!string.IsNullOrWhiteSpace(field.ImageUrl))
                                             {
-                                                <img src="@field.ImageUrl" alt="@field.Name" class="w-full h-full object-cover" />
+                                                <img src="@BuildImageUrl(field.ImageUrl)"
+                                                     alt="@field.Name"
+                                                     class="w-full h-full object-cover" />
                                             }
                                             else
                                             {

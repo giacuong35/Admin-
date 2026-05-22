@@ -1,0 +1,51 @@
+﻿@model Admin.ViewModels.Incidents.CreateIncidentVm
+
+@{
+    ViewData["Title"] = "Tạo sự cố";
+    var fields = ViewBag.Fields as List<Admin.ViewModels.Fields.FieldListItemVm>;
+}
+
+<div class="p-8">
+    <div class="bg-white rounded-3xl border border-zinc-200 p-8 max-w-3xl">
+        <h1 class="text-3xl font-extrabold text-zinc-800 mb-6">Tạo sự cố mới</h1>
+
+        <form asp-action="CreateIncident" method="post" class="space-y-5">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-red-600 text-sm"></div>
+
+            <div>
+                <label class="block text-sm font-bold text-zinc-700 mb-2">Sân</label>
+                <select asp-for="FieldId" class="w-full rounded-2xl border border-zinc-300 px-4 py-3">
+                    <option value="">-- Chọn sân --</option>
+                    @if (fields != null)
+                    {
+                        foreach (var field in fields)
+                        {
+                            <option value="@field.FieldId">@field.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-zinc-700 mb-2">Tiêu đề</label>
+                <input asp-for="Title" class="w-full rounded-2xl border border-zinc-300 px-4 py-3" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-zinc-700 mb-2">Mô tả</label>
+                <textarea asp-for="Description" rows="5" class="w-full rounded-2xl border border-zinc-300 px-4 py-3"></textarea>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button type="submit" class="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700">
+                    Lưu sự cố
+                </button>
+                <a asp-action="Incidents" class="rounded-2xl border border-zinc-300 px-5 py-3 text-sm font-bold text-zinc-700 hover:bg-zinc-100">
+                    Hủy
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

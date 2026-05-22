@@ -1,0 +1,201 @@
+﻿@model Admin.ViewModels.Invoices.InvoiceDetailVm
+
+@{
+    ViewData["Title"] = "Xem trước hóa đơn";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hóa đơn - @Model.InvoiceCode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        @@media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+            }
+
+            .print-wrapper {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="no-print max-w-5xl mx-auto mb-6 flex items-center gap-3">
+        <button onclick="window.print()"
+                class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700 transition">
+            <span>🖨</span>
+            In hóa đơn
+        </button>
+
+        <a asp-action="PrintInvoicePdf"
+           asp-controller="Admin"
+           asp-route-id="@Model.PaymentId"
+           target="_blank"
+           class="inline-flex items-center gap-2 rounded-2xl border border-zinc-300 px-5 py-3 text-sm font-bold text-zinc-700 hover:bg-zinc-100 transition">
+            Tải PDF
+        </a>
+
+        <button onclick="window.close()"
+                class="inline-flex items-center gap-2 rounded-2xl border border-zinc-300 px-5 py-3 text-sm font-bold text-zinc-700 hover:bg-zinc-100 transition">
+            Đóng
+        </button>
+    </div>
+
+    <div class="print-wrapper max-w-5xl mx-auto bg-white border border-zinc-200 shadow-sm rounded-3xl p-10">
+        <div class="flex items-start justify-between border-b border-zinc-200 pb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-emerald-700">SPORT PLUS</h1>
+                <p class="text-sm text-zinc-500 mt-2">Hệ thống quản lý sân bóng</p>
+            </div>
+
+            <div class="text-right">
+                <h2 class="text-2xl font-extrabold text-zinc-800">HÓA ĐƠN THANH TOÁN</h2>
+                <p class="text-sm text-zinc-500 mt-2">Mã hóa đơn: <span class="font-bold text-zinc-800">@Model.InvoiceCode</span></p>
+                <p class="text-sm text-zinc-500">Mã booking: <span class="font-bold text-zinc-800">@Model.BookingId</span></p>
+                <p class="text-sm text-zinc-500">
+                    Ngày thanh toán:
+                    <span class="font-bold text-zinc-800">@Model.PaidAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 mt-8">
+            <div>
+                <h3 class="text-sm font-extrabold uppercase tracking-wider text-zinc-500 mb-3">Thông tin khách hàng</h3>
+                <div class="space-y-2 text-sm">
+                    <p><span class="font-semibold">Họ tên:</span> @Model.CustomerName</p>
+                    <p><span class="font-semibold">Số điện thoại:</span> @Model.CustomerPhone</p>
+                    <p><span class="font-semibold">Email:</span> @Model.CustomerEmail</p>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-extrabold uppercase tracking-wider text-zinc-500 mb-3">Thông tin thanh toán</h3>
+                <div class="space-y-2 text-sm">
+                    <p><span class="font-semibold">Phương thức:</span> @Model.PaymentMethod</p>
+                    <p><span class="font-semibold">Trạng thái:</span> @Model.PaymentStatus</p>
+                    <p><span class="font-semibold">Mã giao dịch:</span> @Model.TransactionCode</p>
+                    <p><span class="font-semibold">Ghi chú:</span> @(string.IsNullOrWhiteSpace(Model.Note) ? "Không có" : Model.Note)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10">
+            <h3 class="text-lg font-extrabold text-zinc-800 mb-4">Chi tiết khung giờ sân</h3>
+
+            <div class="overflow-hidden rounded-2xl border border-zinc-200">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-zinc-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-bold text-zinc-600">Sân</th>
+                            <th class="px-4 py-3 text-left font-bold text-zinc-600">Loại sân</th>
+                            <th class="px-4 py-3 text-left font-bold text-zinc-600">Ngày</th>
+                            <th class="px-4 py-3 text-left font-bold text-zinc-600">Khung giờ</th>
+                            <th class="px-4 py-3 text-right font-bold text-zinc-600">Giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Details != null && Model.Details.Any())
+                        {
+                            foreach (var item in Model.Details)
+                            {
+                                <tr class="border-t border-zinc-200">
+                                    <td class="px-4 py-3">@item.FieldName</td>
+                                    <td class="px-4 py-3">@item.FieldType</td>
+                                    <td class="px-4 py-3">@item.SlotDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="px-4 py-3">@item.StartTime - @item.EndTime</td>
+                                    <td class="px-4 py-3 text-right font-semibold">@item.Price.ToString("N0") VNĐ</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="border-t border-zinc-200">
+                                <td colspan="5" class="px-4 py-6 text-center text-zinc-500">Không có chi tiết sân</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-10">
+            <h3 class="text-lg font-extrabold text-zinc-800 mb-4">Dịch vụ đi kèm</h3>
+
+            <div class="overflow-hidden rounded-2xl border border-zinc-200">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-zinc-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-bold text-zinc-600">Tên dịch vụ</th>
+                            <th class="px-4 py-3 text-right font-bold text-zinc-600">Số lượng</th>
+                            <th class="px-4 py-3 text-right font-bold text-zinc-600">Đơn giá</th>
+                            <th class="px-4 py-3 text-right font-bold text-zinc-600">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Services != null && Model.Services.Any())
+                        {
+                            foreach (var item in Model.Services)
+                            {
+                                <tr class="border-t border-zinc-200">
+                                    <td class="px-4 py-3">@item.ServiceName</td>
+                                    <td class="px-4 py-3 text-right">@item.Quantity</td>
+                                    <td class="px-4 py-3 text-right">@item.UnitPrice.ToString("N0") VNĐ</td>
+                                    <td class="px-4 py-3 text-right font-semibold">@((item.Quantity * item.UnitPrice).ToString("N0")) VNĐ</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr class="border-t border-zinc-200">
+                                <td colspan="4" class="px-4 py-6 text-center text-zinc-500">Không có dịch vụ đi kèm</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-10 flex justify-end">
+            <div class="w-full max-w-sm space-y-3">
+                <div class="flex items-center justify-between text-base">
+                    <span class="font-semibold text-zinc-600">Tổng thanh toán</span>
+                    <span class="text-2xl font-extrabold text-emerald-700">@Model.Amount.ToString("N0") VNĐ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-16 grid grid-cols-2 gap-8 text-center text-sm">
+            <div>
+                <p class="font-semibold">Khách hàng</p>
+                <div class="h-20"></div>
+                <p>@Model.CustomerName</p>
+            </div>
+            <div>
+                <p class="font-semibold">Nhân viên / Quản trị viên</p>
+                <div class="h-20"></div>
+                <p>Sport Plus</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

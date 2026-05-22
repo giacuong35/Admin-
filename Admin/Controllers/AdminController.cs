@@ -9,6 +9,7 @@ using Admin.ViewModels.Suppliers;
 using Admin.ViewModels.Products;
 using Admin.ViewModels.PurchaseOrders;
 using Admin.ViewModels.Invoices;
+using Admin.ViewModels.Incidents;
 
 namespace Admin.Controllers
 {
@@ -41,7 +42,9 @@ namespace Admin.Controllers
 
         public async Task<IActionResult> Reports(int? year, int? month)
         {
-            var selectedYear = year ?? DateTime.Now.Year;
+            var now = DateTime.Now;
+            var selectedYear = year ?? now.Year;
+            var selectedMonth = month ?? now.Month;
 
             var vm = new DashboardPageVm
             {
@@ -49,6 +52,11 @@ namespace Admin.Controllers
                 RevenueByMonth = await _apiClient.GetRevenueByMonthAsync(selectedYear),
                 FieldOccupancy = await _apiClient.GetFieldOccupancyAsync(selectedYear, month),
                 RevenueByService = await _apiClient.GetRevenueByServiceAsync(),
+                MonthlyReport = await _apiClient.GetMonthlyReportAsync(selectedYear, selectedMonth) ?? new MonthlyReportVm
+                {
+                    Year = selectedYear,
+                    Month = selectedMonth
+                },
                 SelectedYear = selectedYear,
                 SelectedMonth = month
             };
@@ -532,6 +540,68 @@ namespace Admin.Controllers
             return RedirectToAction(nameof(BookingDetail), new { id });
         }
 
+        public async Task<IActionResult> AdminRescheduleBooking(int bookingId, int bookingDetailId)
+        {
+            var booking = await _apiClient.GetBookingByIdAsync(bookingId);
+            if (booking == null) return NotFound();
+
+            var targetDetail = booking.Details?.FirstOrDefault(x => x.BookingDetailId == bookingDetailId);
+            if (targetDetail == null) return NotFound();
+
+            ViewBag.Booking = booking;
+            ViewBag.TargetDetail = targetDetail;
+
+            return View(new AdminRescheduleBookingVm
+            {
+                BookingId = bookingId,
+                BookingDetailId = bookingDetailId,
+                SelectedDate = targetDetail.SlotDate
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminRescheduleBooking(AdminRescheduleBookingVm model)
+        {
+            var booking = await _apiClient.GetBookingByIdAsync(model.BookingId);
+            if (booking == null) return NotFound();
+
+            var targetDetail = booking.Details?.FirstOrDefault(x => x.BookingDetailId == model.BookingDetailId);
+            if (targetDetail == null) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Booking = booking;
+                ViewBag.TargetDetail = targetDetail;
+                return View(model);
+            }
+
+            try
+            {
+                await _apiClient.AdminRescheduleBookingAsync(model.BookingId, model);
+
+                TempData["SuccessMessage"] = "Đổi lịch booking thành công!";
+                return RedirectToAction(nameof(BookingDetail), new { id = model.BookingId });
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+
+                if (message.Contains("đạt số lần đổi lịch tối đa", StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError("", "Booking này đã đạt số lần đổi lịch tối đa, không thể đổi thêm.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Không thể đổi lịch lúc này. Vui lòng thử lại.");
+                }
+
+                ViewBag.Booking = booking;
+                ViewBag.TargetDetail = targetDetail;
+                return View(model);
+            }
+        }
+
 
         // =========================
         // SUPPLIERS
@@ -797,6 +867,96 @@ namespace Admin.Controllers
                 return NotFound();
 
             return View(invoice);
+        }
+
+        public async Task<IActionResult> InvoicePreview(int id)
+        {
+            var invoice = await _apiClient.GetInvoiceDetailAsync(id);
+
+            if (invoice == null)
+                return NotFound();
+
+            return View(invoice);
+        }
+
+        public async Task<IActionResult> PrintInvoicePdf(int id)
+        {
+            var pdfBytes = await _apiClient.DownloadInvoicePdfAsync(id);
+
+            if (pdfBytes == null || pdfBytes.Length == 0)
+                return NotFound();
+
+            return File(pdfBytes, "application/pdf", $"HoaDon_{id}.pdf");
+        }
+
+
+        // =========================
+        // INCIDENTS
+        // =========================
+        public async Task<IActionResult> Incidents(int? fieldId, int? statusId)
+        {
+            var items = await _apiClient.GetIncidentsAsync(fieldId, statusId, 1, 100);
+            ViewBag.FieldId = fieldId;
+            ViewBag.StatusId = statusId;
+            ViewBag.Fields = await _apiClient.GetFieldsAsync();
+            return View(items);
+        }
+
+        public async Task<IActionResult> IncidentDetail(int id)
+        {
+            var item = await _apiClient.GetIncidentByIdAsync(id);
+            if (item == null) return NotFound();
+
+            return View(item);
+        }
+
+        public async Task<IActionResult> CreateIncident()
+        {
+            ViewBag.Fields = await _apiClient.GetFieldsAsync();
+            return View(new CreateIncidentVm());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateIncident(CreateIncidentVm model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Fields = await _apiClient.GetFieldsAsync();
+                return View(model);
+            }
+
+            await _apiClient.CreateIncidentAsync(model);
+            TempData["SuccessMessage"] = "Đã tạo sự cố mới!";
+            return RedirectToAction(nameof(Incidents));
+        }
+
+        public async Task<IActionResult> HandleIncident(int id)
+        {
+            var item = await _apiClient.GetIncidentByIdAsync(id);
+            if (item == null) return NotFound();
+
+            ViewBag.Incident = item;
+
+            return View(new HandleIncidentVm
+            {
+                StatusId = item.StatusId
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> HandleIncident(int id, HandleIncidentVm model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Incident = await _apiClient.GetIncidentByIdAsync(id);
+                return View(model);
+            }
+
+            await _apiClient.HandleIncidentAsync(id, model);
+            TempData["SuccessMessage"] = "Đã cập nhật xử lý sự cố!";
+            return RedirectToAction(nameof(IncidentDetail), new { id });
         }
     }
 }

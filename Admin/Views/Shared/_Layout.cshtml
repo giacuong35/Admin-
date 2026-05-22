@@ -143,6 +143,12 @@
                 <span class="font-medium">Quản lí đặt sân</span>
             </a>
 
+            <a href="@Url.Action("Incidents", "Admin")"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @((currentAction == "Incidents" || currentAction == "IncidentDetail" || currentAction == "CreateIncident" || currentAction == "HandleIncident") ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                <span class="material-symbols-outlined">warning</span>
+                <span class="font-medium">Sự cố phát sinh</span>
+            </a>
+
             <a href="@Url.Action("Invoices", "Admin")"
                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @((currentAction == "Invoices" || currentAction == "InvoiceDetail") ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
                 <span class="material-symbols-outlined">receipt_long</span>
