@@ -255,16 +255,31 @@ namespace Admin.Services.Api
         {
             var client = CreateClient();
 
-            var response = await client.PutAsJsonAsync($"api/fields/{fieldId}", new
+            var updateResponse = await client.PutAsJsonAsync($"api/fields/{fieldId}", new
             {
                 name = model.Name,
                 description = model.Description,
                 basePrice = model.BasePrice,
+                peakPrice = model.PeakPrice,
                 typeId = model.TypeId,
                 statusId = model.StatusId
             });
 
-            response.EnsureSuccessStatusCode();
+            updateResponse.EnsureSuccessStatusCode();
+
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                using var content = new MultipartFormDataContent();
+
+                var fileContent = new StreamContent(model.ImageFile.OpenReadStream());
+                fileContent.Headers.ContentType =
+                    new System.Net.Http.Headers.MediaTypeHeaderValue(model.ImageFile.ContentType);
+
+                content.Add(fileContent, "file", model.ImageFile.FileName);
+
+                var imageResponse = await client.PostAsync($"api/fields/{fieldId}/image", content);
+                imageResponse.EnsureSuccessStatusCode();
+            }
         }
 
         public async Task DeleteFieldAsync(int fieldId)

@@ -45,6 +45,12 @@
                 </div>
 
                 <div class="space-y-2">
+                    <label asp-for="PeakPrice" class="text-sm font-bold text-zinc-700">Giá cao điểm</label>
+                    <input asp-for="PeakPrice" type="number" step="1000" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm focus:border-primary focus:ring-primary" />
+                    <span asp-validation-for="PeakPrice" class="text-xs text-red-600"></span>
+                </div>
+
+                <div class="space-y-2">
                     <label asp-for="TypeId" class="text-sm font-bold text-zinc-700">Loại sân</label>
                     <select asp-for="TypeId" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm focus:border-primary focus:ring-primary">
                         <option value="1">Sân 5</option>
@@ -67,7 +73,7 @@
                     <label asp-for="ImageFile" class="text-sm font-bold text-zinc-700">Ảnh sân mới</label>
                     <input asp-for="ImageFile" type="file" accept="image/*" class="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm file:mr-4 file:rounded-xl file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-bold file:text-white hover:file:opacity-90" />
                     <span asp-validation-for="ImageFile" class="text-xs text-red-600"></span>
-                    <p class="text-xs text-zinc-400">Nếu không chọn ảnh mới, hệ thống sẽ giữ ảnh cũ.</p>
+                    <p class="text-xs text-zinc-400">Nếu không chọn ảnh mới, hệ thống sẽ giữ ảnh cũ.</p>        
                 </div>
             </div>
 

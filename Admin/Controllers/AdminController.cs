@@ -329,12 +329,26 @@ namespace Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditField(int id, EditFieldVm model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    TempData["ErrorMessage"] = "ModelState không hợp lệ";
+                    return View(model);
+                }
 
-            await _apiClient.UpdateFieldAsync(id, model);
-            TempData["SuccessMessage"] = "Đã cập nhật sân!";
-            return RedirectToAction(nameof(Fields));
+                await _apiClient.UpdateFieldAsync(id, model);
+
+                var updatedField = await _apiClient.GetFieldByIdAsync(id);
+
+                TempData["SuccessMessage"] = "Đã cập nhật sân";
+                return RedirectToAction(nameof(Fields));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return View(model);
+            }
         }
 
         [HttpPost]
