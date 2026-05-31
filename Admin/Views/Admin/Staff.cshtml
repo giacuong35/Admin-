@@ -9,7 +9,7 @@
     string fromDate = ViewBag.FromDate as string ?? "";
     string toDate = ViewBag.ToDate as string ?? "";
     string keyword = ViewBag.Keyword as string ?? "";
-    var successMessage = TempData["SuccessMessage"]?.ToString();
+    
 }
 
 <div class="p-8 space-y-8 flex-1">
@@ -178,24 +178,3 @@
             </table>
         </div>
     </div>
-
-
-@if (!string.IsNullOrWhiteSpace(successMessage))
-{
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        window.addEventListener('load', function () {
-            var successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(successMessage));
-
-            if (typeof Swal !== "undefined") {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: successMessage,
-                    confirmButtonColor: '#006418',
-                    confirmButtonText: 'Đóng'
-                });
-            }
-        });
-    </script>
-}

@@ -9,6 +9,7 @@ using Admin.ViewModels.Suppliers;
 using Admin.ViewModels.Products;
 using Admin.ViewModels.PurchaseOrders;
 using Admin.ViewModels.Invoices;
+using Admin.ViewModels.Backups;
 using Admin.ViewModels.Incidents;
 
 namespace Admin.Controllers
@@ -957,6 +958,127 @@ namespace Admin.Controllers
             await _apiClient.HandleIncidentAsync(id, model);
             TempData["SuccessMessage"] = "Đã cập nhật xử lý sự cố!";
             return RedirectToAction(nameof(IncidentDetail), new { id });
+        }
+
+
+        //BACKUPS
+
+        public async Task<IActionResult> Backups()
+        {
+            var vm = new BackupPageVm();
+
+            try
+            {
+                vm.Snapshots = await _apiClient.GetBackupSnapshotsAsync();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Không tải được danh sách snapshot: {ex.Message}";
+            }
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateBackupSnapshot()
+        {
+            try
+            {
+                await _apiClient.CreateBackupSnapshotAsync();
+                TempData["SuccessMessage"] = "Tạo snapshot thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Tạo snapshot thất bại: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Backups));
+        }
+
+        public async Task<IActionResult> ExportBackup()
+        {
+            try
+            {
+                var stream = await _apiClient.DownloadBackupExportAsync();
+                return File(stream, "application/zip", $"SportPlus_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.zip");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Export backup thất bại: {ex.Message}";
+                return RedirectToAction(nameof(Backups));
+            }
+        }
+
+        public async Task<IActionResult> DownloadSnapshot(string fileName)
+        {
+            try
+            {
+                var stream = await _apiClient.DownloadBackupSnapshotAsync(fileName);
+                return File(stream, "application/zip", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Tải snapshot thất bại: {ex.Message}";
+                return RedirectToAction(nameof(Backups));
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteSnapshot(string fileName)
+        {
+            try
+            {
+                await _apiClient.DeleteBackupSnapshotAsync(fileName);
+                TempData["SuccessMessage"] = "Xóa snapshot thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Xóa snapshot thất bại: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Backups));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreSnapshot(string fileName)
+        {
+            try
+            {
+                var result = await _apiClient.RestoreBackupFromSnapshotAsync(fileName);
+                TempData["SuccessMessage"] = $"Restore snapshot thành công! Tổng dòng: {result?.TotalRows}";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Restore snapshot thất bại: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Backups));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreBackupFromFile(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                TempData["ErrorMessage"] = "Vui lòng chọn file backup .zip";
+                return RedirectToAction(nameof(Backups));
+            }
+
+            try
+            {
+                var result = await _apiClient.RestoreBackupFromFileAsync(file);
+                TempData["SuccessMessage"] = $"Restore từ file thành công! Tổng dòng: {result?.TotalRows}";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Restore từ file thất bại: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Backups));
         }
     }
 }

@@ -11,6 +11,7 @@ using Admin.ViewModels.Services;
 using Admin.ViewModels.Suppliers;
 using Admin.ViewModels.Users;
 using Admin.ViewModels.Incidents;
+using Admin.ViewModels.Backups;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -883,27 +884,125 @@ namespace Admin.Services.Api
         {
             var client = CreateClient();
 
-            var response = await client.PostAsJsonAsync("api/incidents", new
-            {
-                fieldId = model.FieldId,
-                title = model.Title,
-                description = model.Description
-            });
+            using var form = new MultipartFormDataContent();
 
-            response.EnsureSuccessStatusCode();
+            form.Add(new StringContent(model.FieldId.ToString()), "fieldId");
+            form.Add(new StringContent(model.Title ?? string.Empty), "title");
+            form.Add(new StringContent(model.Description ?? string.Empty), "description");
+
+            var response = await client.PostAsync("api/incidents", form);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API tạo sự cố lỗi: {content}");
+            }
         }
 
         public async Task HandleIncidentAsync(int incidentId, HandleIncidentVm model)
         {
             var client = CreateClient();
 
-            var response = await client.PutAsJsonAsync($"api/incidents/{incidentId}/handle", new
+            var request = new HttpRequestMessage(HttpMethod.Patch, $"api/incidents/{incidentId}/handle")
             {
-                statusId = model.StatusId,
-                handleNote = model.HandleNote
-            });
+                Content = JsonContent.Create(new
+                {
+                    statusId = model.StatusId,
+                    handleNote = model.HandleNote
+                })
+            };
 
+            var response = await client.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API cập nhật sự cố lỗi: {content}");
+            }
+        }
+
+
+        //BACKUPS
+
+        public async Task<List<BackupSnapshotVm>> GetBackupSnapshotsAsync()
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync("api/backup/snapshots");
             response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<List<BackupSnapshotVm>>>();
+            return result?.Data ?? new List<BackupSnapshotVm>();
+        }
+
+        public async Task<BackupSnapshotVm?> CreateBackupSnapshotAsync()
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsync("api/backup/snapshot", null);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<BackupSnapshotVm>>();
+            return result?.Data;
+        }
+
+        public async Task<Stream> DownloadBackupExportAsync()
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync("api/backup/export", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStreamAsync();
+        }
+
+        public async Task<Stream> DownloadBackupSnapshotAsync(string fileName)
+        {
+            var client = CreateClient();
+
+            var response = await client.GetAsync($"api/backup/snapshots/{Uri.EscapeDataString(fileName)}", HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStreamAsync();
+        }
+
+        public async Task DeleteBackupSnapshotAsync(string fileName)
+        {
+            var client = CreateClient();
+
+            var response = await client.DeleteAsync($"api/backup/snapshots/{Uri.EscapeDataString(fileName)}");
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<BackupRestoreResultVm?> RestoreBackupFromSnapshotAsync(string fileName)
+        {
+            var client = CreateClient();
+
+            var response = await client.PostAsync($"api/backup/snapshots/{Uri.EscapeDataString(fileName)}/restore", null);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<BackupRestoreResultVm>>();
+            return result?.Data;
+        }
+
+        public async Task<BackupRestoreResultVm?> RestoreBackupFromFileAsync(IFormFile file)
+        {
+            var client = CreateClient();
+
+            using var form = new MultipartFormDataContent();
+            using var stream = file.OpenReadStream();
+            using var streamContent = new StreamContent(stream);
+
+            streamContent.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType ?? "application/zip");
+
+            form.Add(streamContent, "file", file.FileName);
+
+            var response = await client.PostAsync("api/backup/restore", form);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ApiEnvelope<BackupRestoreResultVm>>();
+            return result?.Data;
         }
     }
 }

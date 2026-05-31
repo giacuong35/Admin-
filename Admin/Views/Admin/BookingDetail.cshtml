@@ -5,7 +5,6 @@
 
     var payments = ViewBag.Payments as List<Admin.ViewModels.Bookings.PaymentVm> ?? new();
     var deposit = ViewBag.Deposit as Admin.ViewModels.Bookings.DepositVm;
-    var successMessage = TempData["SuccessMessage"]?.ToString();
 
     var isCancelled = Model.StatusId == 3;
     var isCompleted = Model.StatusId == 4;
@@ -42,12 +41,6 @@
     }
 }
 
-@if (!string.IsNullOrWhiteSpace(successMessage))
-{
-    <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
-        @successMessage
-    </div>
-}
 
 <section class="hero-gradient rounded-[32px] px-10 py-10 text-white shadow-soft">
     <h1 class="font-manrope text-5xl font-black tracking-tight">CHI TIẾT BOOKING</h1>

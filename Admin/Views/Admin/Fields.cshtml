@@ -143,22 +143,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var successMessage = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["SuccessMessage"]?.ToString()));
-
-            if (successMessage) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: successMessage,
-                    confirmButtonColor: '#006418',
-                    confirmButtonText: 'Đóng'
-                });
-            }
-        });
-    </script>
-}

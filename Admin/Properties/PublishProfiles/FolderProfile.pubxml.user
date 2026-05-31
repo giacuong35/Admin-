@@ -2,7 +2,8 @@
 <!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
 <Project>
   <PropertyGroup>
-    <History>False|2026-05-22T14:54:51.1509505Z||;</History>
+    <History>True|2026-05-22T16:13:22.9144099Z||;False|2026-05-22T21:54:51.1509505+07:00||;</History>
     <LastFailureDetails />
+    <_PublishTargetUrl>C:\Users\jakuo\source\repos</_PublishTargetUrl>
   </PropertyGroup>
 </Project>

@@ -10,6 +10,8 @@ using Admin.ViewModels.Products;
 using Admin.ViewModels.PurchaseOrders;
 using Admin.ViewModels.Invoices;
 using Admin.ViewModels.Incidents;
+using Admin.ViewModels.Backups;
+using Microsoft.AspNetCore.Http;
 
 
 namespace Admin.Services.Api
@@ -107,5 +109,15 @@ namespace Admin.Services.Api
         Task<IncidentDetailVm?> GetIncidentByIdAsync(int incidentId);
         Task CreateIncidentAsync(CreateIncidentVm model);
         Task HandleIncidentAsync(int incidentId, HandleIncidentVm model);
+
+
+        //Backups
+        Task<List<BackupSnapshotVm>> GetBackupSnapshotsAsync();
+        Task<BackupSnapshotVm?> CreateBackupSnapshotAsync();
+        Task<Stream> DownloadBackupExportAsync();
+        Task<Stream> DownloadBackupSnapshotAsync(string fileName);
+        Task DeleteBackupSnapshotAsync(string fileName);
+        Task<BackupRestoreResultVm?> RestoreBackupFromSnapshotAsync(string fileName);
+        Task<BackupRestoreResultVm?> RestoreBackupFromFileAsync(IFormFile file);
     }
 }

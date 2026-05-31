@@ -10,6 +10,9 @@
 
     var roleName = isAdmin ? "Quản trị viên" : "Nhân viên";
     var avatarText = isAdmin ? "AD" : "ST";
+
+    var globalSuccessMessage = TempData["SuccessMessage"]?.ToString();
+    var globalErrorMessage = TempData["ErrorMessage"]?.ToString();
 }
 
 <!DOCTYPE html>
@@ -75,6 +78,46 @@
 </head>
 
 <body class="bg-surface font-inter text-on-surface min-h-screen flex flex-col">
+
+    @if (!string.IsNullOrWhiteSpace(globalSuccessMessage))
+    {
+        <div id="global-success-overlay" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4">
+            <div class="w-full max-w-md rounded-[28px] bg-white p-10 text-center shadow-2xl">
+                <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-4 border-emerald-200 text-emerald-500">
+                    <span class="material-symbols-outlined text-[42px]">check</span>
+                </div>
+
+                <h3 class="text-4xl font-black text-zinc-800">Thành công!</h3>
+                <p class="mt-4 text-lg text-zinc-600">@globalSuccessMessage</p>
+
+                <button type="button"
+                        onclick="closeGlobalPopup('global-success-overlay')"
+                        class="mt-8 inline-flex items-center justify-center rounded-xl bg-emerald-600 px-8 py-3 text-base font-bold text-white transition hover:bg-emerald-700">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(globalErrorMessage))
+    {
+        <div id="global-error-overlay" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4">
+            <div class="w-full max-w-md rounded-[28px] bg-white p-10 text-center shadow-2xl">
+                <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border-4 border-rose-200 text-rose-500">
+                    <span class="material-symbols-outlined text-[42px]">close</span>
+                </div>
+
+                <h3 class="text-4xl font-black text-zinc-800">Có lỗi</h3>
+                <p class="mt-4 text-lg text-zinc-600">@globalErrorMessage</p>
+
+                <button type="button"
+                        onclick="closeGlobalPopup('global-error-overlay')"
+                        class="mt-8 inline-flex items-center justify-center rounded-xl bg-rose-600 px-8 py-3 text-base font-bold text-white transition hover:bg-rose-700">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    }
 
     <aside class="fixed left-0 top-0 h-screen w-64 bg-white z-40 flex flex-col overflow-hidden">
         <div class="px-6 py-8">
@@ -154,6 +197,12 @@
                 <span class="material-symbols-outlined">receipt_long</span>
                 <span class="font-medium">Hóa đơn</span>
             </a>
+
+            <a href="@Url.Action("Backups", "Admin")"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Backups" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                <span class="material-symbols-outlined">backup</span>
+                <span class="font-medium">Backup hệ thống</span>
+            </a>
         </nav>
 
         <div class="p-4">
@@ -228,9 +277,36 @@
         </footer>
     </main>
 
-    <script src="~/js/admin-layout.js" asp-append-version="true"></script>
+    <script>
+        const trigger = document.getElementById('userMenuTrigger');
+        const menu = document.getElementById('userDropdownMenu');
+
+        if (trigger && menu) {
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        }
+
+        function closeGlobalPopup(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                closeGlobalPopup('global-success-overlay');
+                closeGlobalPopup('global-error-overlay');
+            }, 2500);
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
 </body>
 </html>
