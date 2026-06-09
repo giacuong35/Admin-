@@ -198,11 +198,14 @@
                 <span class="font-medium">Hóa đơn</span>
             </a>
 
-            <a href="@Url.Action("Backups", "Admin")"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Backups" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
-                <span class="material-symbols-outlined">backup</span>
-                <span class="font-medium">Backup hệ thống</span>
-            </a>
+            @if (isAdmin)
+            {
+                <a href="@Url.Action("Backups", "Admin")"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all @(currentAction == "Backups" ? "text-primary font-bold bg-emerald-50 border-r-4 border-primary" : "text-zinc-500 hover:bg-zinc-100")">
+                    <span class="material-symbols-outlined">backup</span>
+                    <span class="font-medium">Backup hệ thống</span>
+                </a>
+            }
         </nav>
 
         <div class="p-4">
